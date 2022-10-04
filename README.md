@@ -1,19 +1,8 @@
-# Authentication-template (NodeJS - Mongodb)
+# AARX Dashboard (NodeJS - Mongodb)
 
-Simple NodeJS server with express providing basic authentification with mongodb
+Dashboard program for AARA system.
 
-# Installation
-
-### With Docker (_recommanded way_)
-
-run it:
-`docker-compose up` or `yarn start-docker`
-
-dev with hot reload on sources:
-`docker-compose -f docker-compose.yml -f docker-compose.dev.yml up`
-_alias on `yarn dev`_
-
-### With NodeJS / Mongodb:
+### run With NodeJS / Mongodb:
 
 Start mongodb.
 `node src/server.js`

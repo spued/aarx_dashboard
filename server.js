@@ -3,13 +3,15 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
 const bodyparser = require('body-parser');
-
+const dotenv = require('dotenv').config();
 const app = express();
 const helmet = require('helmet');
 const passport = require('passport');
 const cookies = require('cookie-session');
+// set the view engine to ejs
+app.set('view engine', 'ejs');
 
-const logger = require('./tools/logger');
+const logger = require('./lib/logger');
 
 let allowedCORS;
 
@@ -34,7 +36,7 @@ app.use((req, res, next) => {
 });
 
 app.use(helmet());
-app.use(express.static('public'));
+app.use('/pub', express.static(__dirname + '/pub'))
 app.use(cookieParser());
 app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({ extended: false }));
@@ -57,12 +59,12 @@ app.use(morgan('dev', {
 }));
 
 app.use(require('./routes/user')(passport));
-app.use(require('./routes/health')());
+app.use(require('./routes/main')(passport));
 
 app.get('/helloworld', (req, res) => {
   res.status(200).send('Hello, world!');
 });
 
-app.listen(8081, () => logger.info('Listening on 8081'));
+app.listen(8081,() => logger.info('Listening on ' + process.env.APP_PORT));
 
 module.exports = app;

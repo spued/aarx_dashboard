@@ -1,8 +1,10 @@
 const { DbNoResult } = require('../../errors');
 const { User } = require('../core/Schemas');
 
-function addUser(mail, password) {
-  const u = new User({ mail, password });
+function addUser(data) {
+  console.log('Model: Add user: ' + data.email);
+  console.log(data);
+  const u = new User(data);
   return u.save();
 }
 

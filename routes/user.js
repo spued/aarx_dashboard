@@ -3,10 +3,11 @@ const LocalStrategy = require('passport-local').Strategy;
 const bcrypt = require('bcryptjs');
 const Joi = require('joi');
 const httpStatus = require('http-status-codes');
+const main = require('../controller/controller_main');
 
-const { validating, logged } = require('../tools/middleware');
-const db = require('../db');
-const logger = require('../tools/logger');
+const { validating, logged } = require('../lib/middleware');
+const db = require('../model');
+const logger = require('../lib/logger');
 const { PasswordNoMatch, PasswordHashFailed, DbNoResult } = require('../errors');
 
 function hashPassword(pwd) {
@@ -26,8 +27,14 @@ function isValidPassword(pwd, hash) {
 }
 
 const userschema = Joi.object().keys({
-  mail: Joi.string().email().required(),
-  password: Joi.string().min(6).required(),
+  username: Joi.string().email().required(),
+  email: Joi.string().email().required(),
+  password: Joi.string().min(4).required(),
+  password_confirm: Joi.string().min(4).required(),
+  full_name: Joi.string().min(3).max(128),
+  company_name: Joi.string().min(3).max(128),
+  phone_number: Joi.number().min(7),
+  request_message: Joi.string(),
 });
 
 module.exports = (passport) => {
@@ -66,19 +73,7 @@ module.exports = (passport) => {
       });
   });
 
-  routes.post('/register', validating(userschema), async (req, res) => {
-    const { mail } = req.value;
-    const { password } = req.value;
-    try {
-      const exist = await db.userExist('mail', mail);
-      if (exist) return res.status(409).send({ error: 'user already exist or an error occured' });
-      await db.addUser(mail, await hashPassword(password));
-    } catch (e) {
-      logger.error(e);
-      return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: 'Internal server error' });
-    }
-    return res.status(httpStatus.OK).end();
-  });
+  routes.post('/register', validating(userschema), main.post_register_user);
 
   // Login using passport middleware
   routes.post('/login', validating(userschema),

@@ -1,0 +1,28 @@
+body {
+    margin: 5px;
+    background-color:darkcyan;
+}
+img.banner {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+.center_text {
+    text-align: center 
+}
+.center_form {
+    display: block;
+    margin-left: 30%;
+    margin-right: 30%; 
+}
+.left_bar {
+    display: block;
+    margin-left: 80%;
+    margin-right: auto; 
+}
+label{
+    color: #464646;
+    text-shadow: 0 1px 0 #fff;
+    font-size: 14px;
+    font-weight: bold;
+    }
