@@ -3,6 +3,7 @@ const logger = require('../lib/logger');
 const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
 
+
 function hashPassword(pwd) {
   return new Promise((res, rej) => bcrypt.hash(pwd, bcrypt.genSaltSync(), (err, hash) => {
     if (err) rej(new PasswordHashFailed());
@@ -10,19 +11,46 @@ function hashPassword(pwd) {
   }));
 }
 
-const getDefaultPage = (req,res) => {
-    console.log("Controller: Main: Get main page");
-    res.render('pages/login');
+const getLoginPage = (req,res) => {
+    console.log("Controller: Main: Get login page");
+    let message = "ok";
+    res.render('pages/login', message);
+}
+const getLogoutPage = async (req,res) => {
+  console.log("Controller: Main: Get logout page");
+  await req.logout();
+  console.log("Controller: Main: Successfuly logout");
+  res.render('pages/login');
+}
+const getMainPage = (req,res) => {
+  //console.log(req.user);
+  console.log("Controller: Main: Get main page for " + req.user.fullname);
+  res.render('pages/main_page', req.user);
 }
 const getRegisterPage = (req,res) => {
     console.log("Controller: Main: Get register page");
     res.render('pages/register');
 }
-const getHealth = (req, res) => {
-    if (isConnected()) return res.status(200).end();
-    return res.status(httpStatus.SERVICE_UNAVAILABLE).send({ error: 'Database not connected' });
+const getAarxOnuPage = (req,res) => {
+  console.log("Controller: Main: Get AARX ONU page");
+  db.getOverAllData();
+  res.render('pages/AARX_ONU', req.user);
 }
 
+const post_login_user = async (req, res, next) => {
+  console.log("Controller: Main: User logged in = " + req.user.fullname);
+  await req.login(req.user, function(err) {
+    if (err) { return next(err); }
+    return res.render('pages/main_page', req.user);
+  });
+}
+const post_logout_user = async (req, res) => {
+  console.log("Controller: Main: User logged in = " + req.user.fullname);
+    await req.logout();
+    req.session.save();
+    req.session.user = '';
+    return res.render('pages/login');
+}
 const post_register_user = async (req, res) => {
     resData = {
         code : 1,
@@ -63,9 +91,13 @@ const post_register_user = async (req, res) => {
 }
 
 module.exports = {
-    getDefaultPage,
+    getLoginPage,
+    getLogoutPage,
+    getMainPage,
     getRegisterPage,
-    getHealth,
+    getAarxOnuPage,
 
-    post_register_user
+    post_register_user,
+    post_login_user,
+    post_logout_user
 }

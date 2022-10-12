@@ -1,4 +1,7 @@
+
 body {
+    font-family: 'arial,freesiaUPC,san-serif';
+    font-size: 62.5%;
     margin: 5px;
     background-color:darkcyan;
 }
@@ -26,3 +29,14 @@ label{
     font-size: 14px;
     font-weight: bold;
     }
+
+.btn {
+    margin: 10px;
+}
+
+.main_graph {
+    width: 35%;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}

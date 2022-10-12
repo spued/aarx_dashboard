@@ -1,8 +1,10 @@
 const dotenv = require("dotenv").config();
-const gnodemon = require('gulp-nodemon')
+const gnodemon = require('gulp-nodemon');
+const browserify = require("browserify");
+const source = require('vinyl-source-stream');
 const { watch, task, series, dest } = require('gulp');
 
-task('dev', async () => {
+task('devel', async () => {
     gnodemon({
       script: "server.js",
       require: '.env',
@@ -24,7 +26,16 @@ task('dev', async () => {
       env: {'NODE_ENV': 'development'}
     });
 })
-  
+
+task('browserify', function() {
+  return browserify('pub/js/main.js')
+    .bundle()
+    //Pass desired output filename to vinyl-source-stream
+    .pipe(source('bundle.js'))
+    // Start piping stream to tasks!
+    .pipe(dest('pub/js/'));
+});
+
 task('production', async () => {
   gnodemon({
     script: "server.js",
@@ -44,4 +55,5 @@ task('production', async () => {
   });
 })
 
-task('default', series('dev'));
+task('dev', series('browserify','devel'));
+task('default', series('browserify','devel'));

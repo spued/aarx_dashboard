@@ -37,15 +37,20 @@ const userschema = Joi.object().keys({
   request_message: Joi.string(),
 });
 
+const authenSchema = Joi.object().keys({
+  username: Joi.string().email().required(),
+  password: Joi.string().min(4).required()
+});
+
 module.exports = (passport) => {
-  passport.use(new LocalStrategy({ usernameField: 'mail', passwordField: 'password' },
-    async (mail, password, done) => {
+  passport.use(new LocalStrategy({ usernameField: 'username', passwordField: 'password' },
+    async (username, password, done) => {
       let user = null;
       try {
-        user = await db.getUserFromField('mail', mail);
+        user = await db.getUserFromField('username', username);
       } catch (e) {
         if (e instanceof DbNoResult) {
-          done(null, false, { error: 'Incorrect mail.' });
+          done(null, false, { error: 'Incorrect username.' });
           return;
         }
         done(e, false, { error: 'Internal server error' });
@@ -76,11 +81,9 @@ module.exports = (passport) => {
   routes.post('/register', validating(userschema), main.post_register_user);
 
   // Login using passport middleware
-  routes.post('/login', validating(userschema),
+  routes.post('/login', validating(authenSchema),
     passport.authenticate('local'),
-    (req, res) => {
-      res.status(httpStatus.OK).send(req.user);
-    });
+    main.login_user);
 
   // Simply logs out using passport middleware
   routes.post('/logout', async (req, res) => {

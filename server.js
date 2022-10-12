@@ -6,8 +6,9 @@ const bodyparser = require('body-parser');
 const dotenv = require('dotenv').config();
 const app = express();
 const helmet = require('helmet');
+const session = require('express-session');
 const passport = require('passport');
-const cookies = require('cookie-session');
+
 // set the view engine to ejs
 app.set('view engine', 'ejs');
 
@@ -38,18 +39,20 @@ app.use((req, res, next) => {
 app.use(helmet());
 app.use('/pub', express.static(__dirname + '/pub'))
 app.use(cookieParser());
+
 app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({ extended: false }));
 
-app.use(cookies({
-  domain: process.env.DOMAIN || '.',
-  name: 'session',
-  keys: ['keyy1', 'keyy2'],
-  maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+app.use(session({
+  secret: 'ewrew3432fdg5456gr54ty5tv3w4tr3t534trw4rqw4',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: false }
 }));
 
 app.use(passport.initialize());
 app.use(passport.session());
+
 app.use(morgan('dev', {
   skip: (req) => {
     if (req.url === '/health') return true;
@@ -58,12 +61,8 @@ app.use(morgan('dev', {
   stream: logger.stream,
 }));
 
-app.use(require('./routes/user')(passport));
+//app.use(require('./routes/user')(passport));
 app.use(require('./routes/main')(passport));
-
-app.get('/helloworld', (req, res) => {
-  res.status(200).send('Hello, world!');
-});
 
 app.listen(8081,() => logger.info('Listening on ' + process.env.APP_PORT));
 
