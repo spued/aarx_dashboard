@@ -28,7 +28,7 @@ task('devel', async () => {
 })
 
 task('browserify', function() {
-  return browserify('pub/js/main.js')
+  return browserify('pub/js/bundle_lib.js')
     .bundle()
     //Pass desired output filename to vinyl-source-stream
     .pipe(source('bundle.js'))

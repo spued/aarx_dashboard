@@ -6,8 +6,11 @@ const bodyparser = require('body-parser');
 const dotenv = require('dotenv').config();
 const app = express();
 const helmet = require('helmet');
+const mongoose  = require('mongoose');
 const session = require('express-session');
+const MongoStore = require('connect-mongo');
 const passport = require('passport');
+
 
 // set the view engine to ejs
 app.set('view engine', 'ejs');
@@ -47,7 +50,12 @@ app.use(session({
   secret: 'ewrew3432fdg5456gr54ty5tv3w4tr3t534trw4rqw4',
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false }
+  cookie: { secure: false },
+  store: MongoStore.create({
+    mongoUrl: 'mongodb://'+ process.env.MONGODB_ENDPOINT +'/session',
+    mongoOptions : { useUnifiedTopology: true },
+    ttl: 14 * 24 * 60 * 60
+  })
 }));
 
 app.use(passport.initialize());

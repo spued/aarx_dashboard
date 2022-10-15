@@ -2,9 +2,7 @@ const mongoose = require('mongoose');
 const logger = require('../../lib/logger');
 
 const dbName = 'aarx_db';
-if (!process.env.MONGODB_ENDPOINT || 
-  !process.env.MONGODB_USERNAME || 
-  !process.env.MONGODB_PASSWORD) 
+if (!process.env.MONGODB_ENDPOINT) 
   logger.error('invalid mongodb conf');
 
 let endpoint = `mongodb://${process.env.MONGODB_ENDPOINT}`;

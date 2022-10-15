@@ -8,6 +8,7 @@ const db = require('../model');
 const logger = require('../lib/logger');
 const { PasswordNoMatch, PasswordHashFailed, DbNoResult } = require('../errors');
 const main = require('../controller/controller_main');
+const rx_onu = require('../controller/controller_aarx_onu');
 
 function hashPassword(pwd) {
   return new Promise((res, rej) => bcrypt.hash(pwd, bcrypt.genSaltSync(), (err, hash) => {
@@ -70,14 +71,14 @@ module.exports = (passport) => {
       }));
   
     passport.serializeUser((user, done) => {
-      console.log('serial user = ' + user._id);
+      //console.log('serial user = ' + user._id);
       process.nextTick(function() {
         done(null, user._id);
       })
     });
 
     passport.deserializeUser((id, done) => {
-      console.log('deserial id = ' + id);
+      //console.log('deserial id = ' + id);
       process.nextTick(function() {
         db.getUserFromField('_id', id)
         .then(u => done(null, u))
@@ -122,5 +123,12 @@ module.exports = (passport) => {
     routes.get('/login', isLogged, main.getLoginPage);
     routes.get('/register_request', main.getRegisterPage);
     
+    routes.post('/list_ne', main.post_list_ne);
+    
+    routes.post('/list_pon', isLogged, rx_onu.post_rx_province);
+    routes.post('/list_masters', isLogged, rx_onu.post_masters_info);
+    routes.post('/list_masters_id', isLogged, rx_onu.post_masters_id);
+    routes.post('/count_pon', isLogged, rx_onu.post_count_pon);
+
     return routes;
 };

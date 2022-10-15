@@ -33,7 +33,10 @@ const getRegisterPage = (req,res) => {
 }
 const getAarxOnuPage = (req,res) => {
   console.log("Controller: Main: Get AARX ONU page");
-  db.getOverAllData();
+  db.getOverAllNEData().then(function(rows) {
+      // now you have your rows, you can see if there are <20 of them
+        //console.log(rows);
+  }).catch((err) => setImmediate(() => { throw err; }));
   res.render('pages/AARX_ONU', req.user);
 }
 
@@ -89,7 +92,21 @@ const post_register_user = async (req, res) => {
       res.render('pages/register_failed',resData);
     }
 }
-
+const post_list_ne = async (req, res) => {
+  logger.info("Controller : NE list command.");
+  resData = {
+      code : 1,
+      msg : 'Error : Default'
+  };
+  db.getOverAllNEData().then((rows) => {
+  //console.log(rows);
+    resData.data = rows;
+    resData.rowCount = rows.length;
+    resData.code = 0;
+    resData.msg = "OK";
+    res.json(resData);
+  })
+}
 module.exports = {
     getLoginPage,
     getLogoutPage,
@@ -99,5 +116,6 @@ module.exports = {
 
     post_register_user,
     post_login_user,
-    post_logout_user
+    post_logout_user,
+    post_list_ne
 }
