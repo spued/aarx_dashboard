@@ -19,22 +19,40 @@
                     </div>
                     <div class="col-xl-6">
                         <div class="main_graph">
+                            <label for="rxChart">-</label>
                             <canvas id="rxChart"></canvas>
                         </div>
                     </div>
                     <div class="col-xl-6">
-                        <table id="province_ne_table" class="table table-striped" style="width:100%">
-                            <thead>
-                                <tr>
-                                    <th>Node</th>
-                                    <th>จำนวน PON</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                            <tfoot>
-                            </tfoot>
-                        </table>
+                        <div id="ne_table">
+                            <table id="province_ne_table" class="table table-striped" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>Node</th>
+                                        <th>จำนวน PON</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                                <tfoot>
+                                </tfoot>
+                            </table>
+                        </div>
+                        <div id="rx_table">
+                            <table id="province_rx_table" class="table table-striped" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>PON</th>
+                                        <th>Good</th>
+                                        <th>Bad</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                                <tfoot>
+                                </tfoot>
+                            </table>
+                        </div>
                         <input type="hidden" id="current_prefix" value="">
+                        <input type="hidden" id="current_master_id" value=0>
                     </div>
                 </div>
             </div>

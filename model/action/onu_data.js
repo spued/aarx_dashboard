@@ -1,4 +1,5 @@
 const e = require('express');
+const logger = require('../../lib/logger');
 var db_conn = require('../core/data_connection');
 
 function getOverAllNEData() {
@@ -105,6 +106,122 @@ function countPONByMasterID(master_id, prefix) {
         });
     });
 }
+function getRXONUCount(data) {
+    // get all master prefix that has status active == 0 or previous == 1
+    let sql = "SELECT * FROM aarx_master WHERE id = " + data.master_id;
+    let sql_1 = "SELECT * FROM aarx_status WHERE master_id = " + data.master_id;
+    // get all master id that use by those prefix
+    let sql_2 = "SELECT * FROM import_data WHERE master_id = " + data.master_id + " AND NE_Name LIKE '"+ data.prefix + "%'";
+    //console.log(sql);
+
+    let master_data =  new Promise(function(resolve, reject) {
+        db_conn.query(sql, function (err, rows, fields) {
+            if (err) throw err;
+            resolve(rows);
+        });
+    });
+    let pons=  new Promise(function(resolve, reject) {
+        db_conn.query(sql_1, function (err, rows, fields) {
+            if (err) throw err;
+            resolve(rows);
+        });
+    });
+    let onus =  new Promise(function(resolve, reject) {
+        db_conn.query(sql_2, function (err, rows, fields) {
+            if (err) throw err;
+            resolve(rows);
+        });
+    });
+    return Promise.all([master_data, pons, onus]).then((res) => {
+        //console.log(res);
+        let onu_data = res[2];
+        let pon_data = res[1];
+        let NRSSP = '';
+        let AARX_Power = 0;
+        let good = bad = 0;
+        let onu_count = {
+            good : 0,
+            bad : 0
+        };
+        onu_data.forEach((onu) => {
+            NRSSP = onu.NE_Name + '-' + onu.Rack + '-' + onu.Shelf + '-' + onu.Slot + '-' + onu.Port;
+            AARX_Power = pon_data.find((pon_item) => {
+                return pon_item.NRSSP == NRSSP;
+            })
+            //console.log("NRSSP = " + NRSSP + " Get AARX = " + AARX_Power.aarx + " VS ONU_RX = " + onu.Received_Optical_Power);
+            if(Math.abs(onu.Received_Optical_Power - AARX_Power.aarx) > 3) {
+                //console.log('This is bad');
+                bad++;
+            } else {
+                //console.log('This is Good');
+                good++;
+            }
+        })
+        onu_count.good = good;
+        onu_count.bad = bad;
+        console.log("onu rx result for " + data.prefix + " " + JSON.stringify(onu_count));
+        return onu_count;
+    });
+}
+function getRXONUData(data) {
+    // get all master prefix that has status active == 0 or previous == 1
+    let sql = "SELECT * FROM aarx_master WHERE id = " + data.master_id;
+    let sql_1 = "SELECT * FROM aarx_status WHERE master_id = " + data.master_id;
+    // get all master id that use by those prefix
+    let sql_2 = "SELECT * FROM import_data WHERE master_id = " + data.master_id + " AND NE_Name LIKE '"+ data.prefix + "%'";
+    //console.log(sql);
+
+    let master_data =  new Promise(function(resolve, reject) {
+        db_conn.query(sql, function (err, rows, fields) {
+            if (err) throw err;
+            resolve(rows);
+        });
+    });
+    let pons=  new Promise(function(resolve, reject) {
+        db_conn.query(sql_1, function (err, rows, fields) {
+            if (err) throw err;
+            resolve(rows);
+        });
+    });
+    let onus =  new Promise(function(resolve, reject) {
+        db_conn.query(sql_2, function (err, rows, fields) {
+            if (err) throw err;
+            resolve(rows);
+        });
+    });
+    return Promise.all([master_data, pons, onus]).then((res) => {
+        //console.log(res);
+        let onu_data = res[2];
+        let pon_data = res[1];
+        let NRSSP = '';
+        let AARX_Power = 0;
+        let good = bad = 0;
+        let onu_count = [];
+
+        pon_data.forEach(pon => {
+            onu_count.push( { pon_name : pon.NRSSP,
+                good: 0,
+                bad: 0
+            });
+        })
+        /* onu_data.forEach((onu) => {
+            NRSSP = onu.NE_Name + '-' + onu.Rack + '-' + onu.Shelf + '-' + onu.Slot + '-' + onu.Port;
+            AARX_Power = pon_data.find((pon_item) => {
+                return pon_item.NRSSP == NRSSP;
+            })
+            //console.log("NRSSP = " + NRSSP + " Get AARX = " + AARX_Power.aarx + " VS ONU_RX = " + onu.Received_Optical_Power);
+            if(Math.abs(onu.Received_Optical_Power - AARX_Power.aarx) > 3) {
+                //console.log('This is bad');
+                bad++;
+            } else {
+                //console.log('This is Good');
+                good++;
+            }
+        }) */
+        console.log(onu_count);
+        return onu_count;
+    });
+}
 module.exports = {
     getOverAllNEData,
     getDataByPrefix,
@@ -112,5 +229,7 @@ module.exports = {
     getOverAllMasterData,
     getMasterIDByPrefix,
     getActiveMasterIDByPrefix,
-    countPONByMasterID
+    countPONByMasterID,
+    getRXONUCount,
+    getRXONUData
 }
