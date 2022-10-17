@@ -6,6 +6,8 @@ body {
     background-color:darkcyan;
 }
 img.banner {
+    width: 30%;
+    height: 30%;
     display: block;
     margin-left: auto;
     margin-right: auto;

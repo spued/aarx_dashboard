@@ -10,6 +10,7 @@ const mongoose  = require('mongoose');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const passport = require('passport');
+const path = require('path')
 
 
 // set the view engine to ejs
@@ -41,6 +42,9 @@ app.use((req, res, next) => {
 
 app.use(helmet());
 app.use('/pub', express.static(__dirname + '/pub'))
+app.use('/css', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/css')))
+app.use('/js', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js')))
+
 app.use(cookieParser());
 
 app.use(bodyparser.json());

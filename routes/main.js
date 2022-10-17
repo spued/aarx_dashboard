@@ -127,10 +127,11 @@ module.exports = (passport) => {
     
     routes.post('/list_pon', isLogged, rx_onu.post_rx_province);
     routes.post('/list_masters', isLogged, rx_onu.post_masters_info);
-    routes.post('/list_masters_id', isLogged, rx_onu.post_masters_id);
+    routes.post('/list_master_id', isLogged, rx_onu.post_list_master_id);
     routes.post('/count_pon', isLogged, rx_onu.post_count_pon);
-    routes.post('/rx_onu', isLogged, rx_onu.post_rx_onu_count);
-    routes.post('/rx_pon', isLogged, rx_onu.post_rx_pon_count);
+    routes.post('/rx_count_onu', isLogged, rx_onu.post_rx_onu_count);
+    routes.post('/rx_count_pon', isLogged, rx_onu.post_rx_pon_count);
+    routes.post('/rx_pon_onu', isLogged, rx_onu.post_pon_onu);
 
     return routes;
 };

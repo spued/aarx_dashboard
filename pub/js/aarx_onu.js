@@ -1,9 +1,12 @@
 var province_ne_table = null;
 var province_rx_table = null;
+var pon_onu_table = null;
 var master_info = null;
-var master_ids_data = null;
+var master_id_data = null;
 var active_master_pon_count = [];
 var previous_master_pon_count = [];
+var pon_count_data = [{ 'pon_name': '-','pon_aarx': '0', 'good' : 0, 'bad' : 0 }];
+var pon_onu_data = [{ 'onu_id': 0, 'name' : '-', 'rx' : 0 }];
 
 $(function() {
   $("#rx_table").hide();
@@ -29,27 +32,69 @@ $(function() {
   });
 
   province_rx_table = $('#province_rx_table').DataTable({
-    processing: true,
-    serverSide: false,
-    ajax: {
-        url: '/rx_pon',
-        type: 'POST',
-        data: { 
-          prefix : function() { 
-            return $("#current_prefix").val() 
-          },
-          master_id : function() { 
-            return $("#current_master_id").val() 
-          }
-        }
-    },
+    //processing: true,
+    data:  pon_count_data ,
     columns: [
         { data: 'pon_name' },
+        { data: 'pon_aarx' },
         { data: 'good' },
         { data: 'bad' }
     ],
+    createdRow: function (data) {
+      //console.log(data);
+    }
   });
+
+  pon_onu_table = $('#pon_onu_table').DataTable({
+    //processing: true,
+    data:  pon_onu_data ,
+    columns: [
+        { data: 'onu_id' },
+        { data: 'name' },
+        { data: {},
+          render: (data) => {
+            let html = '';
+            if(Math.abs(data.rx - data.aarx) > 2) {
+              html='<i class="text text-danger">'+data.rx+'</i>';
+            } else {
+              html='<i class="text text-success">'+data.rx+'</i>';
+            }
+            return html;
+          } }
+    ],
+  });
+
   drawGraph();
+});
+
+$('#province_rx_table').on('click', 'tbody td', function() {
+  //get textContent of the TD
+  //console.log('TD cell textContent : ', this.textContent)
+  //get the value of the TD using the API 
+  pon_onu_data = [];
+  let data = province_rx_table.row(this).data();
+  $("#ponName").text(data.pon_name + ' @RX ' + data.pon_aarx);
+  $.post('/rx_pon_onu', { 
+    nrssp: data.pon_name,
+    master_id: $("#current_master_id").val()
+   }, function(res) {
+    //console.log(res.data[0]);
+    res.data[0].forEach((item) => {
+      //console.log(item);
+      pon_onu_data.push({
+        onu_id : item.ONU_ID,
+        name: item.Name,
+        rx: item.Received_Optical_Power,
+        aarx: data.pon_aarx
+      });
+    })
+    pon_onu_table.clear().rows.add(pon_onu_data).draw();
+    $("#ponONUModal").modal('show');
+  })
+});
+
+$('#ponONUModal').on('click', 'button.close', function (eventObject) {
+  $('#ponONUModal').modal('hide');
 });
 
 $(".btn-province").on("click",function(){
@@ -63,15 +108,45 @@ $(".btn-province").on("click",function(){
     master_ids = res;
   });
   drawGraph();
+  $("#rx_table").hide();
   province_ne_table.ajax.reload();
- 
+  $("#ne_table").show();
 })
+
+
 
 function showProvinceRXTable() {
   $("#ne_table").hide();
-  $("#current_master_id").val(109);
-  province_rx_table.ajax.reload();
-  $("#rx_table").show();
+  $("#rx_table").hide();
+  pon_count_data = [];
+  $.post('/list_master_id', { prefix: $("#current_prefix").val() }, function(res) {
+    //console.log(res);
+    let promises = [];
+    master_id_data = res.data;
+    let good = bad = 0;
+    master_id_data.forEach((element) => {
+      if(element.status == 1) {
+        $("#current_master_id").val(element.id);
+        promises.push(
+          $.post('/rx_count_pon', { 
+            master_id: element.id ,
+            prefix: $("#current_prefix").val() 
+          }, function(_res) {
+            //console.log(_res.data);
+            _res.data.forEach((item) => {
+              //console.log(item);
+              pon_count_data.push(item);
+            })
+          })
+        );
+      }
+    });
+    Promise.all(promises).then(() => {
+      //console.log(good,bad);
+      province_rx_table.clear().rows.add(pon_count_data).draw();
+      $("#rx_table").show();
+    });
+  })
 }
 
 const graph_profile = {
@@ -123,24 +198,24 @@ function clickHandler(evt) {
   }
 }
 function drawGraph() {
-  $.post('/list_masters_id', { prefix: $("#current_prefix").val() }, function(res) {
+  $.post('/list_master_id', { prefix: $("#current_prefix").val() }, function(res) {
     //console.log(res);
     var promises = [];
     master_ids_data = res.data;
     let good = bad = 0;
     master_ids_data.forEach((element) => {
       if(element.status == 1) {
-      promises.push(
-        $.post('/rx_onu', { 
-          master_id: element.id ,
-          prefix: $("#current_prefix").val() 
-        }, function(_res) {
-          //console.log(_res);
-          good += _res.data.good;
-          bad += _res.data.bad;
-        })
-      );
-    }
+        promises.push(
+          $.post('/rx_count_onu', { 
+            master_id: element.id ,
+            prefix: $("#current_prefix").val() 
+          }, function(_res) {
+            //console.log(_res);
+            good += _res.data.good;
+            bad += _res.data.bad;
+          })
+        );
+      }
     });
     Promise.all(promises).then(() => {
       //console.log(good,bad);

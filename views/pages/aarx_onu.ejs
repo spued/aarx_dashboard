@@ -6,25 +6,28 @@
     <div>
         <div class="card">
             <div class="card-header">
-
-            </div>
-            <div class="card-body">
                 <div class="row">
                     <div class="col-xl-12">
                         <h5>จังหวัด: 
                             <button class="btn btn-info btn-province" prefix="skm">สมุทรสงคราม</button>
-                            <button class="btn btn-info btn-province" prefix="ssk">สมุทรสาคร</button>
+                            <button class="btn btn-info btn-province" prefix="skn">สมุทรสาคร</button>
                             <button class="btn btn-info btn-province" prefix="atg">อ่างทอง</button>
                         </h5>
                     </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
                     <div class="col-xl-6">
-                        <div class="main_graph">
-                            <label for="rxChart">-</label>
-                            <canvas id="rxChart"></canvas>
-                        </div>
+                            <div class="main_graph">
+                                <label class="text text-success h5" for="rxChart">-</label> <h5>: ONU Quality</h5>
+                                <canvas id="rxChart"></canvas>
+                            </div>
                     </div>
                     <div class="col-xl-6">
+                        
                         <div id="ne_table">
+                            <label for="province_ne_table">OLT Node และ จำนวน PON</label>
                             <table id="province_ne_table" class="table table-striped" style="width:100%">
                                 <thead>
                                     <tr>
@@ -38,10 +41,12 @@
                             </table>
                         </div>
                         <div id="rx_table">
+                            <label for="province_rx_table">PON และ จำนวน ONU</label>
                             <table id="province_rx_table" class="table table-striped" style="width:100%">
                                 <thead>
                                     <tr>
                                         <th>PON</th>
+                                        <th>A@RX</th>
                                         <th>Good</th>
                                         <th>Bad</th>
                                     </tr>
@@ -58,7 +63,41 @@
             </div>
     </div>
 </div>
+<!-- Modal -->
+<div class="modal fade" id="ponONUModal" tabindex="-1" role="dialog" aria-labelledby="modalTitle" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">PON ONU details</h5>
+                <button type="button" class="btn close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="pon_onu">
+                    <h5 class="text" id="ponName">-</h5>
+                    <table id="pon_onu_table" class="table table-striped" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>RX</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                        <tfoot>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success close" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 <script type="text/javascript" src="/pub/js/bundle.js"></script>
+<script type="text/javascript" src="/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="https://cdn.datatables.net/v/dt/jq-3.6.0/dt-1.12.1/datatables.min.js"></script>
 <script type="text/javascript" src="/pub/js/aarx_onu.js" defer></script>
 <%- include('./footer'); %>
