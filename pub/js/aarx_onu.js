@@ -7,7 +7,7 @@ var active_master_pon_count = [];
 var previous_master_pon_count = [];
 var pon_count_data = [{ 'pon_name': '-','pon_aarx': '0', 'good' : 0, 'bad' : 0 }];
 var pon_onu_data = [{ 'onu_id': 0, 'name' : '-', 'rx' : 0 }];
-
+var master_id_list = [];
 $(function() {
   $("#rx_table").hide();
   $("#current_prefix").val($(".btn-province:first-of-type").attr('prefix'));
@@ -70,13 +70,14 @@ $(function() {
 $('#province_rx_table').on('click', 'tbody td', function() {
   //get textContent of the TD
   //console.log('TD cell textContent : ', this.textContent)
-  //get the value of the TD using the API 
   pon_onu_data = [];
   let data = province_rx_table.row(this).data();
   $("#ponName").text(data.pon_name + ' @RX ' + data.pon_aarx);
   $.post('/rx_pon_onu', { 
     nrssp: data.pon_name,
-    master_id: $("#current_master_id").val()
+    master_id: function() {
+      if(!!master_id_list[0]) return master_id_list[0];
+    }
    }, function(res) {
     //console.log(res.data[0]);
     res.data[0].forEach((item) => {
@@ -122,11 +123,13 @@ function showProvinceRXTable() {
   $.post('/list_master_id', { prefix: $("#current_prefix").val() }, function(res) {
     //console.log(res);
     let promises = [];
+    master_id_list = [];
     master_id_data = res.data;
     let good = bad = 0;
     master_id_data.forEach((element) => {
       if(element.status == 1) {
         $("#current_master_id").val(element.id);
+        master_id_list.push(element.id);
         promises.push(
           $.post('/rx_count_pon', { 
             master_id: element.id ,

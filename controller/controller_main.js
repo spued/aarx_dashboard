@@ -37,7 +37,7 @@ const getAarxOnuPage = (req,res) => {
       // now you have your rows, you can see if there are <20 of them
         //console.log(rows);
   }).catch((err) => setImmediate(() => { throw err; }));
-  res.render('pages/AARX_ONU', req.user);
+  res.render('pages/aarx_onu', req.user);
 }
 
 const post_login_user = async (req, res, next) => {
