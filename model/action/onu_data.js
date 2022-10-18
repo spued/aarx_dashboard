@@ -149,7 +149,7 @@ function getRXONUCount(data) {
                 return pon_item.NRSSP == NRSSP;
             })
             //console.log("NRSSP = " + NRSSP + " Get AARX = " + AARX_Power.aarx + " VS ONU_RX = " + onu.Received_Optical_Power);
-            if(Math.abs(onu.Received_Optical_Power - AARX_Power.aarx) > 2) {
+            if((onu.Received_Optical_Power - AARX_Power.aarx)  < (-2)) {
                 //console.log('This is bad');
                 bad++;
             } else {
@@ -204,7 +204,7 @@ function getRXONUData(data) {
                 NRSSP = onu.NE_Name + '-' + onu.Rack + '-' + onu.Shelf + '-' + onu.Slot + '-' + onu.Port;
                 if(NRSSP == pon.NRSSP) {
                     //console.log("NRSSP = " + NRSSP + " Get AARX = " + AARX_Power.aarx + " VS ONU_RX = " + onu.Received_Optical_Power);
-                    if(Math.abs(onu.Received_Optical_Power - pon.aarx) > 2) {
+                    if((onu.Received_Optical_Power - pon.aarx) < (-2)) {
                         //console.log('This is bad');
                         bad++;
                     } else {

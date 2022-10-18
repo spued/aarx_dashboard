@@ -54,7 +54,7 @@ $(function() {
         { data: {},
           render: (data) => {
             let html = '';
-            if(Math.abs(data.rx - data.aarx) > 2) {
+            if((data.rx - data.aarx) < (-2)) {
               html='<i class="text text-danger">'+data.rx+'</i>';
             } else {
               html='<i class="text text-success">'+data.rx+'</i>';
