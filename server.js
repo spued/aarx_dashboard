@@ -43,6 +43,7 @@ app.use((req, res, next) => {
 app.use(helmet());
 app.use('/pub', express.static(__dirname + '/pub'))
 app.use('/css', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/css')))
+app.use('/js', express.static(path.join(__dirname, 'node_modules/popper.js/dist/umd')))
 app.use('/js', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js')))
 
 app.use(cookieParser());

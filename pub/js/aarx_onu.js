@@ -8,7 +8,18 @@ var previous_master_pon_count = [];
 var pon_count_data = [{ 'pon_name': '-','pon_aarx': '0', 'good' : 0, 'bad' : 0 }];
 var pon_onu_data = [{ 'onu_id': 0, 'name' : '-', 'rx' : 0 }];
 var master_id_list = [];
+var loadingModal =  $('#loadingModal');
+
+$(document).ajaxStart(function(){
+  $('#loadingModal').modal('show');
+});
+$(document).ajaxStop(function(){
+  $('#loadingModal').modal('hide');
+});
+
 $(function() {
+ 
+
   $("#rx_table").hide();
   $("#current_prefix").val($(".btn-province:first-of-type").attr('prefix'));
   $(".main_graph > label").text($(".btn-province:first-of-type").text());
@@ -32,7 +43,7 @@ $(function() {
   });
 
   province_rx_table = $('#province_rx_table').DataTable({
-    //processing: true,
+    processing: true,
     data:  pon_count_data ,
     columns: [
         { data: 'pon_name' },
@@ -62,9 +73,11 @@ $(function() {
             return html;
           } }
     ],
+    drawCallback: () => {
+    }
   });
-
   drawGraph();
+  
 });
 
 $('#province_rx_table').on('click', 'tbody td', function() {
@@ -98,7 +111,7 @@ $('#ponONUModal').on('click', 'button.close', function (eventObject) {
   $('#ponONUModal').modal('hide');
 });
 
-$(".btn-province").on("click",function(){
+$(".btn-province").on("click",function() {
   let prefix = $(this).attr('prefix');
   //console.log("Search for province prefix = " + prefix);
   
@@ -107,6 +120,7 @@ $(".btn-province").on("click",function(){
   $.post('/list_masters_id', { prefix: $("#current_prefix").val() }, function(res) {
     //console.log(res);
     master_ids = res;
+    
   });
   drawGraph();
   $("#rx_table").hide();
@@ -155,7 +169,7 @@ function showProvinceRXTable() {
 const graph_profile = {
   labels: [
     'Good',
-    'Bad'
+    'Not conform'
   ],
   datasets: [{
     label: 'A@RX ONU graph',
@@ -193,7 +207,7 @@ function clickHandler(evt) {
       const label = rxChart.data.labels[firstPoint.index];
       const value = rxChart.data.datasets[firstPoint.datasetIndex].data[firstPoint.index];
       //console.log(label , value);
-      if(label.startsWith('Bad')) { 
+      if(label.startsWith('Not conform')) { 
         showProvinceRXTable();
       } else {
         //console.log('later');
@@ -204,9 +218,9 @@ function drawGraph() {
   $.post('/list_master_id', { prefix: $("#current_prefix").val() }, function(res) {
     //console.log(res);
     var promises = [];
-    master_ids_data = res.data;
+    master_id_data = res.data;
     let good = bad = 0;
-    master_ids_data.forEach((element) => {
+    master_id_data.forEach((element) => {
       if(element.status == 1) {
         promises.push(
           $.post('/rx_count_onu', { 
@@ -222,14 +236,12 @@ function drawGraph() {
     });
     Promise.all(promises).then(() => {
       //console.log(good,bad);
-      rxChart.data.datasets[0].data = [good,bad];
-      rxChart.data.labels = ['Good = ' + good, 'Bad = ' + bad];
+      rxChart.data.datasets[0].data = [good, bad];
+      rxChart.data.labels = ['Good = ' + good, 'Not conform = ' + bad];
       rxChart.update();
       rxChart.show();
-      
     });
   })
-  
 }
 
 

@@ -25,13 +25,12 @@
                             </div>
                     </div>
                     <div class="col-xl-6">
-                        
                         <div id="ne_table">
                             <label for="province_ne_table">OLT Node และ จำนวน PON</label>
                             <table id="province_ne_table" class="table table-striped" style="width:100%">
                                 <thead>
                                     <tr>
-                                        <th>Node</th>
+                                        <th>ชื่อ Node</th>
                                         <th>จำนวน PON</th>
                                     </tr>
                                 </thead>
@@ -45,10 +44,10 @@
                             <table id="province_rx_table" class="table table-striped" style="width:100%">
                                 <thead>
                                     <tr>
-                                        <th>PON</th>
+                                        <th>ชื่อ PON</th>
                                         <th>A@RX</th>
                                         <th>Good</th>
-                                        <th>Bad</th>
+                                        <th>Not conform</th>
                                     </tr>
                                 </thead>
                                 <tbody></tbody>
@@ -64,7 +63,15 @@
     </div>
 </div>
 <!-- Modal -->
-<div class="modal fade" id="ponONUModal" tabindex="-1" role="dialog" aria-labelledby="modalTitle" aria-hidden="true">
+
+<div class="modal" id="loadingModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered d-flex justify-content-center" role="document">
+        <div class="spinner-border text-default" style="width: 3rem; height: 3rem;" role="status">
+            <span class="sr-only"></span>
+          </div>
+    </div>
+</div>
+<div class="modal" id="ponONUModal" tabindex="-1" role="dialog" aria-labelledby="modalTitle" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -96,8 +103,12 @@
         </div>
     </div>
 </div>
+
+
 <script type="text/javascript" src="/pub/js/bundle.js"></script>
+<script type="text/javascript" src="/js/popper.min.js"></script>
 <script type="text/javascript" src="/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.7/dist/loadingoverlay.min.js"></script>
 <script type="text/javascript" src="https://cdn.datatables.net/v/dt/jq-3.6.0/dt-1.12.1/datatables.min.js"></script>
 <script type="text/javascript" src="/pub/js/aarx_onu.js" defer></script>
 <%- include('./footer'); %>

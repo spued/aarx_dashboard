@@ -3,7 +3,19 @@ body {
     font-family: 'arial,freesiaUPC,san-serif';
     font-size: 62.5%;
     margin: 5px;
-    background-color:darkcyan;
+    background-color:rgb(80, 146, 146);
+}
+label {
+    color: #1109ab;
+    text-shadow: 0 1px 0 #fff;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+table {
+    color: #464646;
+    text-shadow: 0 1px 0 #fff;
+    font-size: .8rem;
+    margin: 0;
 }
 img.banner {
     width: 30%;
@@ -17,20 +29,14 @@ img.banner {
 }
 .center_form {
     display: block;
-    margin-left: 30%;
-    margin-right: 30%; 
+    margin-left: 20%;
+    margin-right: 20%; 
 }
 .left_bar {
     display: block;
     margin-left: 80%;
     margin-right: auto; 
 }
-label{
-    color: #464646;
-    text-shadow: 0 1px 0 #fff;
-    font-size: 14px;
-    font-weight: bold;
-    }
 
 .btn {
     margin: 10px;
@@ -42,3 +48,4 @@ label{
     margin-left: auto;
     margin-right: auto;
 }
+
