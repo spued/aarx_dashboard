@@ -18,11 +18,9 @@ $(document).ajaxStop(function(){
 });
 
 $(function() {
- 
-
   $("#rx_table").hide();
   $("#current_prefix").val($(".btn-province:first-of-type").attr('prefix'));
-  $(".main_graph > label").text($(".btn-province:first-of-type").text());
+  $("#province_label").text($(".btn-province:first-of-type").text());
   if(province_ne_table != null) province_ne_table.destroy();
   province_ne_table = $('#province_ne_table').DataTable({
     processing: true,
@@ -86,11 +84,10 @@ $('#province_rx_table').on('click', 'tbody td', function() {
   pon_onu_data = [];
   let data = province_rx_table.row(this).data();
   $("#ponName").text(data.pon_name + ' @RX ' + data.pon_aarx);
+  //console.log(master_id_list);
   $.post('/rx_pon_onu', { 
     nrssp: data.pon_name,
-    master_id: function() {
-      if(!!master_id_list[0]) return master_id_list[0];
-    }
+    master_id: JSON.stringify(master_id_list),
    }, function(res) {
     //console.log(res.data[0]);
     res.data[0].forEach((item) => {
@@ -111,12 +108,28 @@ $('#ponONUModal').on('click', 'button.close', function (eventObject) {
   $('#ponONUModal').modal('hide');
 });
 
+$(".btn-nc-list").on("click",function() {
+  let _prefix =  $("#current_prefix").val();
+  console.log("get nc list for " + _prefix);
+  $.post('/list_master_id', { prefix: $("#current_prefix").val() }, function(res) {
+    console.log(res.data);
+    res.data.forEach(item => {
+      $.post('/list_nc_onu', {
+        prefix : _prefix,
+        master_id : item.id
+      } , function(res) {
+        console.log(res);
+      });
+    })
+  })
+})
+
 $(".btn-province").on("click",function() {
   let prefix = $(this).attr('prefix');
   //console.log("Search for province prefix = " + prefix);
   
   $("#current_prefix").val(prefix);
-  $(".main_graph > label").text($(this).text());
+  $("#province_label").text($(this).text());
   $.post('/list_masters_id', { prefix: $("#current_prefix").val() }, function(res) {
     //console.log(res);
     master_ids = res;
@@ -141,6 +154,7 @@ function showProvinceRXTable() {
     master_id_data = res.data;
     let good = bad = 0;
     master_id_data.forEach((element) => {
+      //console.log("master id = " + element.id + " status = " + element.status);
       if(element.status == 1) {
         $("#current_master_id").val(element.id);
         master_id_list.push(element.id);

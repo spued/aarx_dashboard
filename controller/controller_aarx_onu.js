@@ -87,6 +87,7 @@ const post_rx_onu_count = async (req, res) => {
 }
 const post_rx_pon_count = async (req, res) => {
     logger.info("Controller : get RX pon for master id = " + req.body.master_id);
+    console.log(req.body);
     resData = {
         code : 1,
         msg : 'Error : Default'
@@ -111,6 +112,8 @@ const post_pon_onu = async (req, res) => {
         code : 1,
         msg : 'Error : Default'
     };
+    //console.log(req.body);
+    let master_id_list = JSON.parse(req.body.master_id);
     let nrssp = parseNRSSP(req.body.nrssp);
     let _data = {
         ne_name : nrssp[0], 
@@ -118,10 +121,26 @@ const post_pon_onu = async (req, res) => {
         shelf : nrssp[2],
         slot : nrssp[3],
         port : nrssp[4],
-        master_id: req.body.master_id
+        master_id: master_id_list
     }
-    console.log(_data);
+    //console.log(_data);
     db.getPONONURXData(_data).then(function(rows) {
+        //console.log(rows);
+        resData.data = rows;
+        resData.rowCount = rows.length;
+        resData.code = 0;
+        resData.msg = 'OK';
+        res.json(resData);
+    }).catch((err) => setImmediate(() => { throw err; }));
+}
+
+const post_list_nc_onu = async (req, res) => {
+    logger.info("Controller : get list nc onu for prefix = " + req.body.prefix);
+    resData = {
+        code : 1,
+        msg : 'Error : Default'
+    };
+    db.getNCONUData(req.body).then(function(rows) {
         //console.log(rows);
         resData.data = rows;
         resData.rowCount = rows.length;
@@ -137,5 +156,6 @@ module.exports = {
     post_count_pon,
     post_rx_onu_count,
     post_rx_pon_count,
-    post_pon_onu
+    post_pon_onu,
+    post_list_nc_onu
 }

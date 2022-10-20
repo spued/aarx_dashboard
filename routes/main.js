@@ -132,6 +132,7 @@ module.exports = (passport) => {
     routes.post('/rx_count_onu', isLogged, rx_onu.post_rx_onu_count);
     routes.post('/rx_count_pon', isLogged, rx_onu.post_rx_pon_count);
     routes.post('/rx_pon_onu', isLogged, rx_onu.post_pon_onu);
+    routes.post('/list_nc_onu', isLogged, rx_onu.post_list_nc_onu);
 
     return routes;
 };

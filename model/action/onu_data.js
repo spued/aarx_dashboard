@@ -164,13 +164,13 @@ function getRXONUCount(data) {
     });
 }
 function getRXONUData(data) {
+    //console.log(data);
     // get all master prefix that has status active == 0 or previous == 1
     let sql = "SELECT * FROM aarx_master WHERE id = " + data.master_id;
-    let sql_1 = "SELECT * FROM aarx_status WHERE status = 1 AND master_id = " + data.master_id + " AND NE_Name LIKE '"+ data.prefix + "%'";
+    let sql_1 = "SELECT * FROM aarx_status WHERE status = 1 AND master_id = "+ data.master_id + " AND NE_Name LIKE '"+ data.prefix + "%'";
     // get all master id that use by those prefix
-    let sql_2 = "SELECT * FROM import_data WHERE master_id = " + data.master_id + " AND NE_Name LIKE '"+ data.prefix + "%'";
-    //console.log(sql);
-
+    let sql_2 = "SELECT * FROM import_data WHERE master_id = "+ data.master_id + " AND NE_Name LIKE '"+ data.prefix + "%'";
+    
     let master_data =  new Promise(function(resolve, reject) {
         db_conn.query(sql, function (err, rows, fields) {
             if (err) throw err;
@@ -231,9 +231,14 @@ function getPONONURXData(data) {
     " AND Shelf = "+ data.shelf +
     " AND Slot = "+ data.slot +
     " AND Port = "+ data.port +
-    " AND master_id = "+ data.master_id;
-    console.log(sql);
+    " AND (master_id = -1";
 
+    data.master_id.forEach(item => {
+        sql += ' OR master_id = ' + item;
+    })
+
+    sql += ')';
+    //console.log(sql);
     let onus = new Promise(function(resolve, reject) {
         db_conn.query(sql, function (err, rows, fields) {
             if (err) throw err;
@@ -243,6 +248,68 @@ function getPONONURXData(data) {
     return Promise.all([onus]).then((res) => {
         //console.log(res);
         return res;
+    });
+}
+
+function getNCONUData(data) {
+//console.log(data);
+    // get all master prefix that has status active == 0 or previous == 1
+    let sql = "SELECT * FROM aarx_master WHERE id = " + data.master_id;
+    let sql_1 = "SELECT * FROM aarx_status WHERE status = 1 AND master_id = "+ data.master_id + " AND NE_Name LIKE '"+ data.prefix + "%'";
+    // get all master id that use by those prefix
+    let sql_2 = "SELECT * FROM import_data WHERE master_id = "+ data.master_id + " AND NE_Name LIKE '"+ data.prefix + "%'";
+    
+    let master_data =  new Promise(function(resolve, reject) {
+        db_conn.query(sql, function (err, rows, fields) {
+            if (err) throw err;
+            resolve(rows);
+        });
+    });
+    let pons=  new Promise(function(resolve, reject) {
+        db_conn.query(sql_1, function (err, rows, fields) {
+            if (err) throw err;
+            resolve(rows);
+        });
+    });
+    let onus =  new Promise(function(resolve, reject) {
+        db_conn.query(sql_2, function (err, rows, fields) {
+            if (err) throw err;
+            resolve(rows);
+        });
+    });
+    return Promise.all([master_data, pons, onus]).then((res) => {
+        //console.log(res);
+        let onu_data = res[2];
+        let pon_data = res[1];
+        let NRSSP = '';
+        let good = bad = 0;
+        let onu_count = [];
+
+        pon_data.forEach(pon => {
+            good = 0; 
+            bad = 0;
+            onu_data.forEach((onu) => {
+                NRSSP = onu.NE_Name + '-' + onu.Rack + '-' + onu.Shelf + '-' + onu.Slot + '-' + onu.Port;
+                if(NRSSP == pon.NRSSP) {
+                    //console.log("NRSSP = " + NRSSP + " Get AARX = " + AARX_Power.aarx + " VS ONU_RX = " + onu.Received_Optical_Power);
+                    if((onu.Received_Optical_Power - pon.aarx) < (-2)) {
+                        //console.log('This is bad');
+                        bad++;
+                    } else {
+                        //console.log('This is Good');
+                        good++;
+                    }
+                }
+            })
+            onu_count.push( { 
+                pon_name : pon.NRSSP,
+                pon_aarx : pon.aarx,
+                good: good,
+                bad: bad
+            });
+        })
+        //console.log(onu_count);
+        return onu_count;
     });
 }
 module.exports = {
@@ -255,5 +322,6 @@ module.exports = {
     countPONByMasterID,
     getRXONUCount,
     getRXONUData,
-    getPONONURXData
+    getPONONURXData,
+    getNCONUData
 }
