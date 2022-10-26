@@ -282,8 +282,7 @@ function getNCONUData(data) {
         let onu_data = res[2];
         let pon_data = res[1];
         let NRSSP = '';
-        let good = bad = 0;
-        let onu_count = [];
+        let onu_res_data = [];
 
         pon_data.forEach(pon => {
             good = 0; 
@@ -292,24 +291,22 @@ function getNCONUData(data) {
                 NRSSP = onu.NE_Name + '-' + onu.Rack + '-' + onu.Shelf + '-' + onu.Slot + '-' + onu.Port;
                 if(NRSSP == pon.NRSSP) {
                     //console.log("NRSSP = " + NRSSP + " Get AARX = " + AARX_Power.aarx + " VS ONU_RX = " + onu.Received_Optical_Power);
-                    if((onu.Received_Optical_Power - pon.aarx) < (-2)) {
-                        //console.log('This is bad');
-                        bad++;
-                    } else {
-                        //console.log('This is Good');
-                        good++;
+                    if((onu.Received_Optical_Power - pon.aarx) > (2)) {
+                        //console.log('This is over range onu');
+                        let _onu_data = {
+                            onu_id: onu.ONU_ID,
+                            NRSSP: pon.NRSSP,
+                            name: onu.Name,
+                            rx: onu.Received_Optical_Power,
+                            aarx : pon.aarx
+                        };
+                        onu_res_data.push(_onu_data);
                     }
                 }
             })
-            onu_count.push( { 
-                pon_name : pon.NRSSP,
-                pon_aarx : pon.aarx,
-                good: good,
-                bad: bad
-            });
         })
         //console.log(onu_count);
-        return onu_count;
+        return onu_res_data;
     });
 }
 module.exports = {

@@ -71,14 +71,14 @@ module.exports = (passport) => {
       }));
   
     passport.serializeUser((user, done) => {
-      //console.log('serial user = ' + user._id);
+      //console.log('Serialize user = ' + user._id);
       process.nextTick(function() {
         done(null, user._id);
       })
     });
 
     passport.deserializeUser((id, done) => {
-      //console.log('deserial id = ' + id);
+      //console.log('Deserialize id = ' + id);
       process.nextTick(function() {
         db.getUserFromField('_id', id)
         .then(u => done(null, u))
@@ -122,8 +122,14 @@ module.exports = (passport) => {
     routes.get('/logout', isLogged, main.getLogoutPage);
     routes.get('/login', isLogged, main.getLoginPage);
     routes.get('/register_request', main.getRegisterPage);
-    
+    routes.get('/user_man', isLogged, main.getUserMan);
+    routes.get('/user_setting', isLogged, main.getUserSetting);
+
     routes.post('/list_ne', main.post_list_ne);
+    routes.post('/list_user', main.post_list_users);
+    routes.post('/user_save', main.post_save_user);
+    routes.post('/user_delete', main.post_delete_user);
+    routes.post('/user_password', main.post_password_user);
     
     routes.post('/list_pon', isLogged, rx_onu.post_rx_province);
     routes.post('/list_masters', isLogged, rx_onu.post_masters_info);

@@ -29,6 +29,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: "user"
   },
+  status: {
+    type: String,
+    default: "0"
+  },
   right: {
     type: String,
     default: "-"

@@ -1,12 +1,16 @@
 var province_ne_table = null;
 var province_rx_table = null;
 var pon_onu_table = null;
+var nc_onu_table = null;
+
 var master_info = null;
 var master_id_data = null;
 var active_master_pon_count = [];
 var previous_master_pon_count = [];
+
 var pon_count_data = [{ 'pon_name': '-','pon_aarx': '0', 'good' : 0, 'bad' : 0 }];
 var pon_onu_data = [{ 'onu_id': 0, 'name' : '-', 'rx' : 0 }];
+var onu_nc_data = [{ 'onu_id': 0, 'NRSSP': '-' , 'name' : '-', 'rx' : 0, 'aarx' : 0 }];
 var master_id_list = [];
 var loadingModal =  $('#loadingModal');
 
@@ -57,6 +61,7 @@ $(function() {
   pon_onu_table = $('#pon_onu_table').DataTable({
     //processing: true,
     data:  pon_onu_data ,
+    order: [[1, 'desc']],
     columns: [
         { data: 'onu_id' },
         { data: 'name' },
@@ -74,6 +79,40 @@ $(function() {
     drawCallback: () => {
     }
   });
+
+  nc_onu_table = $('#nc_onu_table').DataTable({
+    processing: true,
+    serverSide: false,
+    scrollY : true,
+    scrollY : "400px",
+    order: [[3, 'desc']],
+    data:  onu_nc_data ,
+    dom: 'Blfrtip',
+    buttons: [
+      'copyHtml5',
+      'excelHtml5',
+      'csvHtml5',
+      'pdfHtml5'
+    ],
+    columns: [
+        { data: 'onu_id' },
+        { data: 'NRSSP' },
+        { data: 'name' },
+        { data: 'rx' },
+        { data: 'aarx' }
+    ],
+    drawCallback: () => {
+    }
+  });
+
+  var r=$('<input/>').attr({
+    type: "button",
+    id: "field",
+    value: 'new',
+    class : "btn btn-info btn-province",
+    prefix: 'kkk'
+  });
+  $('.province-button').append(r);
   drawGraph();
   
 });
@@ -104,25 +143,37 @@ $('#province_rx_table').on('click', 'tbody td', function() {
   })
 });
 
-$('#ponONUModal').on('click', 'button.close', function (eventObject) {
-  $('#ponONUModal').modal('hide');
-});
+
 
 $(".btn-nc-list").on("click",function() {
+  $("#nc_onu_prefix").text($("#current_prefix").val());
   let _prefix =  $("#current_prefix").val();
-  console.log("get nc list for " + _prefix);
+  //console.log("get nc list for " + _prefix);
+  onu_nc_data = [];
+  let _promises = [];
   $.post('/list_master_id', { prefix: $("#current_prefix").val() }, function(res) {
-    console.log(res.data);
+    //console.log(res.data);
     res.data.forEach(item => {
-      $.post('/list_nc_onu', {
-        prefix : _prefix,
-        master_id : item.id
-      } , function(res) {
-        console.log(res);
-      });
+      _promises.push(
+        $.post('/list_nc_onu', {
+          prefix : _prefix,
+          master_id : item.id
+        } , function(_res) {
+          //console.log(res.data);
+          _res.data.forEach(_item => {
+            onu_nc_data.push(_item);
+          })
+        })
+      );
+    })
+    Promise.all(_promises).then(() => {
+      //console.log(onu_nc_data);
+      nc_onu_table.clear().rows.add(onu_nc_data).draw();
+      $("#ncONUModal").modal('show');
     })
   })
-})
+  
+});
 
 $(".btn-province").on("click",function() {
   let prefix = $(this).attr('prefix');
@@ -179,6 +230,14 @@ function showProvinceRXTable() {
     });
   })
 }
+
+$('#ponONUModal').on('click', 'button.close', function (eventObject) {
+  $('#ponONUModal').modal('hide');
+});
+
+$('#ncONUModal').on('click', 'button.close', function (eventObject) {
+  $('#ncONUModal').modal('hide');
+});
 
 const graph_profile = {
   labels: [
