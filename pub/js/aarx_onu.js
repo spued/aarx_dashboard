@@ -170,7 +170,9 @@ $('#province_rx_table').on('click', 'tbody td', function() {
   $.post('/list_master_id', { prefix: $("#current_prefix").val() }, function(res) {
     //console.log(res);
     master_ids = res;
-    master_id_list = [res.data[0].id,res.data[1].id];
+    for(item of res.data) {
+      master_id_list.push(item.id);
+    }
   }).done(() => {
     //console.log(master_id_list);
     $.post('/rx_pon_onu', { 
