@@ -7,6 +7,8 @@
         <div class="card">
             <div class="card-header">
                 <div class="text-success h4"> รายการผู้ใช้งาน </div>
+                <button class="btn btn-warning btn-user-session-list" id="btn_user_session_list">Session List</button>
+                <button class="btn btn-warning btn-user-action-logs" id="btn_user_action_log">Activity log</button>
             </div>
             <div class="card-body">
                 <div class="row"></div>
@@ -33,6 +35,8 @@
 
 <%- include('../modals/modal_edit_user'); %>
 <%- include('../modals/modal_change_password'); %>
+<%- include('../modals/modal_user_session_list'); %>
+<%- include('../modals/modal_user_action_log'); %>
 <%- include('../modals/modal_loading'); %>
 
 <script type="text/javascript" src="/pub/js/bundle.js"></script>

@@ -54,4 +54,13 @@ img.menu_logo {
     margin-left: auto;
     margin-right: auto;
 }
+.tx_graph {
+    width: 60%;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+table.dataTable tbody tr:hover {
+    background-color:#71d1eb !important;
+}
 

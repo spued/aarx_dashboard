@@ -11,20 +11,27 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-xl-12">
-                        <div class="h3 text-info">
-                            <p>
-                                Email : <%= username %>
-                            </p> 
-                            <p>
-                                Name : <%= fullname %>
-                            </p>
-                            <p>
-                                Type : <%= type %>
-                            </p>
+                        <div class="row d-flex justify-content-center">
+                            <div class="col-md-7">
+                                <div class="card p-3 py-4">
+                                    <div class="text-center">
+                                        <img src="/pub/img/businessman.png" width="100" class="rounded-circle">
+                                    </div>
+                                    <div class="text-center mt-3">
+                                        <span class="bg-secondary p-1 px-4 rounded text-white h5"><%= type %> : <%= username %></span>
+                                    </div>
+                                    <div class="text-center mt-3">
+                                        <span class="bg-secondary p-1 px-4 rounded text-white h5"><%= fullname %></span>
+                                    </div>
+                                    <div class="text-center mt-3">
+                                        <span class="bg-success p-1 px-4 rounded text-white h5"><%= message %></span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="col-xl-12">
-                        <h5> <div class="text text-success">Change password</div></h5>
+                        <h5> <div class="text text-success">เปลี่ยนพาสเวิร์ด (มากกว่า 6 ตัวอักษร)</div></h5>
                         <form action="/change_password" method="post" id="form_user_user_password">
                             <div class="row">
                                 <div class="col-xl-12">

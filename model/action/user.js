@@ -1,5 +1,20 @@
 const { DbNoResult } = require('../../errors');
-const { User } = require('../core/Schemas');
+const { User, Sessions, Logs } = require('../core/Schemas');
+
+function pumpLog(data) {
+  const log = new Logs(data);
+  return log.save();
+}
+
+function listUserSessions(data) {
+  const sessions = Sessions.find(data);
+  return sessions;
+}
+
+function listUserLogs(data) {
+  const actions = Logs.find(data).sort({ createdAt : -1 }).limit(100);
+  return actions;
+}
 
 function addUser(data) {
   const u = new User(data);
@@ -23,7 +38,7 @@ function modifyUserPassword(id, pwd) {
 }
 
 async function list_user(field, value) {
-  return await User.find({});
+  return await User.find({ [field]: value });
 }
 
 async function save_user(data) {
@@ -43,10 +58,14 @@ async function delete_user(data) {
 
 module.exports = {
   addUser,
+  listUserSessions,
+  listUserLogs,
   getUserFromField,
   userExist,
   modifyUserPassword,
   list_user,
   save_user,
-  delete_user
+  delete_user,
+
+  pumpLog
 };

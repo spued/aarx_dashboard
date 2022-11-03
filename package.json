@@ -50,6 +50,7 @@
     "passport-local": "^1.0.0",
     "popper.js": "^1.16.1",
     "promise-mysql": "^5.2.0",
+    "serve-favicon": "^2.5.0",
     "supertest": "^4.0.2",
     "util": "^0.12.4",
     "uuid": "^9.0.0",

@@ -2,7 +2,9 @@ var province_ne_table = null;
 var province_rx_table = null;
 var pon_onu_table = null;
 var nc_onu_table = null;
+var nc_onu_history_table = null;
 
+var current_province = null;
 var master_info = null;
 var master_id_data = null;
 var active_master_pon_count = [];
@@ -11,6 +13,8 @@ var previous_master_pon_count = [];
 var pon_count_data = [{ 'pon_name': '-','pon_aarx': '0', 'good' : 0, 'bad' : 0 }];
 var pon_onu_data = [{ 'onu_id': 0, 'name' : '-', 'rx' : 0 }];
 var onu_nc_data = [{ 'onu_id': 0, 'NRSSP': '-' , 'name' : '-', 'rx' : 0, 'aarx' : 0 }];
+var onu_nc_history_data = [{ 'pon_quantity': 0, 'previous': 0 , 'current' : 0}];
+
 var master_id_list = [];
 var loadingModal =  $('#loadingModal');
 
@@ -29,6 +33,7 @@ $(function() {
   province_ne_table = $('#province_ne_table').DataTable({
     processing: true,
     serverSide: false,
+    order: [[1, 'asc']],
     ajax: {
         url: '/list_pon',
         type: 'POST',
@@ -39,6 +44,11 @@ $(function() {
         }
     },
     columns: [
+        { data : null,
+          render : function(data, type, full, meta) {
+            return meta.row + 1;
+          }
+        },
         { data: 'NE_Name' },
         { data: 'ne_count' }
     ],
@@ -79,15 +89,16 @@ $(function() {
     drawCallback: () => {
     }
   });
-
+  let _dom = 'lfrtip';
+  if($('#user_type').val() == 'admin') _dom = 'Blfrtip';
   nc_onu_table = $('#nc_onu_table').DataTable({
     processing: true,
     serverSide: false,
     scrollY : true,
     scrollY : "400px",
-    order: [[3, 'desc']],
+    order: [[4, 'desc']],
     data:  onu_nc_data ,
-    dom: 'Blfrtip',
+    dom:  _dom,
     buttons: [
       'copyHtml5',
       'excelHtml5',
@@ -95,96 +106,202 @@ $(function() {
       'pdfHtml5'
     ],
     columns: [
-        { data: 'onu_id' },
-        { data: 'NRSSP' },
-        { data: 'name' },
-        { data: 'rx' },
-        { data: 'aarx' }
+      { data: 'onu_id' },
+      { data: 'NRSSP' },
+      { data: 'name' },
+      { data: 'rx' },
+      { data: 'aarx' }
     ],
     drawCallback: () => {
     }
   });
-
-  var r=$('<input/>').attr({
-    type: "button",
-    id: "field",
-    value: 'new',
-    class : "btn btn-info btn-province",
-    prefix: 'kkk'
+  nc_onu_history_table = $('#nc_onu_history_table').DataTable({
+    processing: true,
+    serverSide: false,
+    scrollY : true,
+    scrollY : "400px",
+    data:  onu_nc_history_data ,
+    columns: [
+        { data: 'pon_quantity' },
+        { data: 'previous' },
+        { data: 'current' },
+        { data: {},
+          render:(data) => {
+            return data.current - data.previous;
+          } 
+        }
+    ],
+    drawCallback: () => {
+    }
   });
+  const user_right = $('#user_right').val();
+  var r = parseUserRightToButton(user_right);
   $('.province-button').append(r);
   drawGraph();
   
 });
-
+function parseUserRightToButton(data) {
+  let province = null;
+  let buttons = [];
+  if(!data) {
+    return 0;
+  } else {
+    province = data.split(',');
+    if(province.length) {
+      province.forEach(function(item) {
+        let _button = item.split(':');
+        if(_button.length >= 2) {
+          buttons.push($('<button/>').attr({
+          class : "btn btn-info btn-province",
+          prefix: _button[1]
+        }).text(_button[0]))
+        }
+      })
+    }
+    return buttons;
+  }
+}
 $('#province_rx_table').on('click', 'tbody td', function() {
   //get textContent of the TD
   //console.log('TD cell textContent : ', this.textContent)
   pon_onu_data = [];
   let data = province_rx_table.row(this).data();
   $("#ponName").text(data.pon_name + ' @RX ' + data.pon_aarx);
-  //console.log(master_id_list);
-  $.post('/rx_pon_onu', { 
-    nrssp: data.pon_name,
-    master_id: JSON.stringify(master_id_list),
-   }, function(res) {
-    //console.log(res.data[0]);
-    res.data[0].forEach((item) => {
-      //console.log(item);
-      pon_onu_data.push({
-        onu_id : item.ONU_ID,
-        name: item.Name,
-        rx: item.Received_Optical_Power,
-        aarx: data.pon_aarx
-      });
-    })
-    pon_onu_table.clear().rows.add(pon_onu_data).draw();
-    $("#ponONUModal").modal('show');
-  })
-});
-
-
-
-$(".btn-nc-list").on("click",function() {
-  $("#nc_onu_prefix").text($("#current_prefix").val());
-  let _prefix =  $("#current_prefix").val();
-  //console.log("get nc list for " + _prefix);
-  onu_nc_data = [];
-  let _promises = [];
   $.post('/list_master_id', { prefix: $("#current_prefix").val() }, function(res) {
-    //console.log(res.data);
-    res.data.forEach(item => {
-      _promises.push(
-        $.post('/list_nc_onu', {
-          prefix : _prefix,
-          master_id : item.id
-        } , function(_res) {
-          //console.log(res.data);
-          _res.data.forEach(_item => {
-            onu_nc_data.push(_item);
-          })
-        })
-      );
-    })
-    Promise.all(_promises).then(() => {
-      //console.log(onu_nc_data);
-      nc_onu_table.clear().rows.add(onu_nc_data).draw();
-      $("#ncONUModal").modal('show');
+    //console.log(res);
+    master_ids = res;
+    master_id_list = [res.data[0].id,res.data[1].id];
+  }).done(() => {
+    //console.log(master_id_list);
+    $.post('/rx_pon_onu', { 
+      nrssp: data.pon_name,
+      master_id: JSON.stringify(master_id_list),
+    }, function(res) {
+      //console.log(res.data[0]);
+      res.data[0].forEach((item) => {
+        //console.log(item);
+        pon_onu_data.push({
+          onu_id : item.ONU_ID,
+          name: item.Name,
+          rx: item.Received_Optical_Power,
+          aarx: data.pon_aarx
+        });
+      })
+      pon_onu_table.clear().rows.add(pon_onu_data).draw();
+      $("#ponONUModal").modal('show');
     })
   })
   
 });
 
-$(".btn-province").on("click",function() {
+$(".btn-pon-list").on("click", function() {
+  let _prefix =  $("#current_prefix").val();
+  if(_prefix == 'default') {
+    alert('ให้กดเลือกข้อมูลจังหวัดก่อน');
+    return 0;
+  } else {
+    showProvinceRXTable();
+  }
+})
+
+$(".btn-nc-list").on("click", function() {
+  let _prefix =  $("#current_prefix").val();
+  //console.log("get nc list for " + _prefix);
+  if(_prefix == 'default') {
+    alert('ให้กดเลือกข้อมูลจังหวัดก่อน');
+    return 0;
+  }
+  else {
+    $("#nc_onu_prefix").text(_prefix + " : " + current_province);
+    onu_nc_data = [];
+    let _promises = [];
+    _promises.push(
+      $.post('/list_nc_onu', {
+        prefix : _prefix,
+        master_id : 0
+      } , function(_res) {
+        //console.log(res.data);
+        _res.data.forEach(_item => {
+          onu_nc_data.push(_item);
+        })
+      })
+    );
+  
+    Promise.all(_promises).then(() => {
+      //console.log(onu_nc_data);
+      nc_onu_table.clear().rows.add(onu_nc_data).draw();
+      nc_onu_table.columns.adjust();
+      $('.dataTables_scrollHeadInner, .dataTable').css({'width':'100%'})
+      $("#ncONUModal").modal('show');
+    })
+  }
+});
+
+$(".btn-nc-history").on("click", function() {
+  let _prefix =  $("#current_prefix").val();
+  //console.log("get nc list for " + _prefix);
+  
+  if(_prefix == 'default') {
+    alert('ให้กดเลือกข้อมูลจังหวัดก่อน');
+    return 0;
+  }
+  else
+    $.post('/list_nc_history_onu', {
+      prefix : _prefix
+    } , function(_res){
+      //console.log(_res.data);
+      let diff = _res.data[0].current - _res.data[0].previous;
+
+      $("#nc_onu_province_history_table > thead > tr > th:nth-child(3)").text('ครั้งก่อน ' +_res.data[0].prev_date);
+      $("#nc_onu_province_history_table > thead > tr > th:nth-child(4)").text('ล่าสุด ' +_res.data[0].curr_date);
+
+      $("#nc_onu_province_history_table > tbody > tr > td:nth-child(1)").text(_res.data[0].pon_quantity);
+      $("#nc_onu_province_history_table > tbody > tr > td:nth-child(2)").text(_res.data[0].curr_onu_count);
+      $("#nc_onu_province_history_table > tbody > tr > td:nth-child(3)").text(_res.data[0].previous);
+      $("#nc_onu_province_history_table > tbody > tr > td:nth-child(4)").text(_res.data[0].current);
+      $("#nc_onu_province_history_table > tbody > tr > td:nth-child(5)").text(diff);
+      $("#provinceHistoryONUModal").modal('show');
+      $('#province_history_onu_prefix').text(_prefix + " : " + current_province);
+      
+    })
+});
+
+$(".btn-nc-all-history").on("click", function() {
+  let _prefix =  $("#current_prefix").val();
+  //console.log("get nc list for " + _prefix);
+  onu_nc_history_data = [];
+  if(_prefix == 'default') {
+    alert('ให้กดเลือกข้อมูลจังหวัดก่อน');
+    return 0;
+  }
+  else
+    $.post('/list_nc_history_onu', {
+      prefix : _prefix
+    } , function(_res){
+      console.log(_res.data);
+      onu_nc_history_data = _res.data;
+      //console.log(onu_nc_history_data);
+      $(nc_onu_history_table.columns(1).header()).text(_res.data.prev_date);
+      nc_onu_history_table.clear().rows.add(onu_nc_history_data).draw();
+      nc_onu_history_table.columns.adjust();
+      $('.dataTables_scrollHeadInner, .dataTable').css({'width':'100%'})
+      $("#provinceHistoryONUModal").modal('show');
+      $('#history_onu_prefix').text(_prefix);
+      
+    })
+});
+
+$(document).on("click",".btn-province",function() {
   let prefix = $(this).attr('prefix');
   //console.log("Search for province prefix = " + prefix);
   
   $("#current_prefix").val(prefix);
   $("#province_label").text($(this).text());
-  $.post('/list_masters_id', { prefix: $("#current_prefix").val() }, function(res) {
+  current_province = $(this).text();
+
+  $.post('/list_master_id', { prefix: $("#current_prefix").val() }, function(res) {
     //console.log(res);
     master_ids = res;
-    
   });
   drawGraph();
   $("#rx_table").hide();
@@ -192,43 +309,32 @@ $(".btn-province").on("click",function() {
   $("#ne_table").show();
 })
 
-
-
 function showProvinceRXTable() {
   $("#ne_table").hide();
   $("#rx_table").hide();
   pon_count_data = [];
-  $.post('/list_master_id', { prefix: $("#current_prefix").val() }, function(res) {
-    //console.log(res);
-    let promises = [];
-    master_id_list = [];
-    master_id_data = res.data;
-    let good = bad = 0;
-    master_id_data.forEach((element) => {
-      //console.log("master id = " + element.id + " status = " + element.status);
-      if(element.status == 1) {
-        $("#current_master_id").val(element.id);
-        master_id_list.push(element.id);
-        promises.push(
-          $.post('/rx_count_pon', { 
-            master_id: element.id ,
-            prefix: $("#current_prefix").val() 
-          }, function(_res) {
-            //console.log(_res.data);
-            _res.data.forEach((item) => {
-              //console.log(item);
-              pon_count_data.push(item);
-            })
-          })
-        );
-      }
-    });
-    Promise.all(promises).then(() => {
-      //console.log(good,bad);
-      province_rx_table.clear().rows.add(pon_count_data).draw();
-      $("#rx_table").show();
-    });
-  })
+  //console.log(res);
+  let promises = [];
+
+  promises.push(
+    $.post('/rx_count_pon', { 
+      master_id: 0 ,
+      prefix: $("#current_prefix").val() 
+    }, function(_res) {
+      //console.log(_res.data);
+      _res.data.forEach((item) => {
+        //console.log(item);
+        pon_count_data.push(item);
+      })
+    })
+  );
+     
+  Promise.all(promises).then(() => {
+    
+    province_rx_table.clear().rows.add(pon_count_data).draw();
+    province_rx_table.columns.adjust();
+    $("#rx_table").show();
+  });
 }
 
 $('#ponONUModal').on('click', 'button.close', function (eventObject) {
@@ -237,6 +343,14 @@ $('#ponONUModal').on('click', 'button.close', function (eventObject) {
 
 $('#ncONUModal').on('click', 'button.close', function (eventObject) {
   $('#ncONUModal').modal('hide');
+});
+
+$('#historyONUModal').on('click', 'button.close', function (eventObject) {
+  $('#historyONUModal').modal('hide');
+});
+
+$('#provinceHistoryONUModal').on('click', 'button.close', function (eventObject) {
+  $('#provinceHistoryONUModal').modal('hide');
 });
 
 const graph_profile = {
@@ -283,38 +397,33 @@ function clickHandler(evt) {
       if(label.startsWith('Not conform')) { 
         showProvinceRXTable();
       } else {
-        //console.log('later');
+        showProvinceRXTable();
       }
   }
 }
 function drawGraph() {
-  $.post('/list_master_id', { prefix: $("#current_prefix").val() }, function(res) {
     //console.log(res);
     var promises = [];
-    master_id_data = res.data;
     let good = bad = 0;
-    master_id_data.forEach((element) => {
-      if(element.status == 1) {
-        promises.push(
-          $.post('/rx_count_onu', { 
-            master_id: element.id ,
-            prefix: $("#current_prefix").val() 
-          }, function(_res) {
-            //console.log(_res);
-            good += _res.data.good;
-            bad += _res.data.bad;
-          })
-        );
-      }
-    });
+    promises.push(
+      $.post('/rx_count_onu', { 
+        master_id: 0 ,
+        prefix: $("#current_prefix").val() 
+      }, function(_res) {
+        //console.log(_res);
+        good = _res.data.good;
+        bad = _res.data.bad;
+      })
+    );
     Promise.all(promises).then(() => {
       //console.log(good,bad);
-      rxChart.data.datasets[0].data = [good, bad];
-      rxChart.data.labels = ['Good = ' + good, 'Not conform = ' + bad];
-      rxChart.update();
-      rxChart.show();
+      if(good != undefined) {
+        rxChart.data.datasets[0].data = [good, bad];
+        rxChart.data.labels = ['Good = ' + good, 'Not conform = ' + bad];
+        rxChart.update();
+        rxChart.show();
+      }
     });
-  })
 }
 
 

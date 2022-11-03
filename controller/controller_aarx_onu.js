@@ -22,7 +22,7 @@ const post_rx_province = async (req, res) => {
     }).catch((err) => setImmediate(() => { throw err; }));
 }
 const post_masters_info = async (req, res) => {
-    logger.info("Controller : get master list");
+    logger.info("Controller : get all master list");
     resData = {
         code : 1,
         msg : 'Error : Default'
@@ -37,19 +37,24 @@ const post_masters_info = async (req, res) => {
     }).catch((err) => setImmediate(() => { throw err; }));
 }
 const post_list_master_id = async (req, res) => {
-    logger.info("Controller : get master id list for profix = " + req.body.prefix);
+    logger.info("Controller : get master id list for prefix = " + req.body.prefix);
     resData = {
         code : 1,
-        msg : 'Error : Default'
-    };
-    db.getActiveMasterIDByPrefix(req.body.prefix).then(function(rows) {
-        //console.log(rows);
-        resData.data = rows;
-        resData.rowCount = rows.length;
-        resData.code = 0;
-        resData.msg = 'OK';
-        res.json(resData);
-    }).catch((err) => setImmediate(() => { throw err; }));
+        msg : 'Error : Default',
+        data : []
+    }; 
+    if(req.body.prefix == 'default') {
+        return res.json(resData);
+    } else {
+        db.getActiveMasterIDByPrefix(req.body.prefix).then(function(rows) {
+            //console.log(rows);
+            resData.data = rows;
+            resData.rowCount = rows.length;
+            resData.code = 0;
+            resData.msg = 'OK';
+            res.json(resData);
+        }).catch((err) => setImmediate(() => { throw err; }));
+    }
 }
 const post_count_pon = async (req, res) => {
     logger.info("Controller : get pon count for master id = " + req.body.master_id);
@@ -67,27 +72,32 @@ const post_count_pon = async (req, res) => {
     }).catch((err) => setImmediate(() => { throw err; }));
 }
 const post_rx_onu_count = async (req, res) => {
-    logger.info("Controller : get onu count for master id = " + req.body.master_id);
+    logger.info("Controller : get onu count for prefix = " + req.body.prefix);
     resData = {
         code : 1,
-        msg : 'Error : Default'
+        msg : 'Error : Default',
+        data : []
     };
-    let _data = {
-        master_id : req.body.master_id, 
-        prefix : req.body.prefix
-    }
-    db.getRXONUCount(_data).then(function(rows) {
-        //console.log(rows);
-        resData.data = rows;
-        resData.rowCount = rows.length;
-        resData.code = 0;
-        resData.msg = 'OK';
+    if(req.body.prefix == 'default') {
         res.json(resData);
-    }).catch((err) => setImmediate(() => { throw err; }));
+    } else {
+        let _data = {
+            master_id : req.body.master_id, 
+            prefix : req.body.prefix
+        }
+        db.getRXONUCount(_data).then(function(rows) {
+            //console.log(rows);
+            resData.data = rows;
+            resData.rowCount = rows.length;
+            resData.code = 0;
+            resData.msg = 'OK';
+            res.json(resData);
+        }).catch((err) => setImmediate(() => { throw err; }));
+    }
 }
 const post_rx_pon_count = async (req, res) => {
-    logger.info("Controller : get RX pon for master id = " + req.body.master_id);
-    console.log(req.body);
+    logger.info("Controller : get RX pon count for prefix = " + req.body.prefix);
+    //console.log(req.body);
     resData = {
         code : 1,
         msg : 'Error : Default'
@@ -96,7 +106,7 @@ const post_rx_pon_count = async (req, res) => {
         master_id : req.body.master_id, 
         prefix : req.body.prefix
     }
-    db.getRXONUData(_data).then(function(rows) {
+    db.get_RX_ONU_data(_data).then(function(rows) {
         //console.log(rows);
         resData.data = rows;
         resData.rowCount = rows.length;
@@ -124,7 +134,7 @@ const post_pon_onu = async (req, res) => {
         master_id: master_id_list
     }
     //console.log(_data);
-    db.getPONONURXData(_data).then(function(rows) {
+    db.get_PON_ONU_RX_data(_data).then(function(rows) {
         //console.log(rows);
         resData.data = rows;
         resData.rowCount = rows.length;
@@ -140,9 +150,26 @@ const post_list_nc_onu = async (req, res) => {
         code : 1,
         msg : 'Error : Default'
     };
-    db.getNCONUData(req.body).then(function(rows) {
+    db.get_NC_ONU_data(req.body).then(function(rows) {
         //console.log(rows);
         resData.data = rows;
+        resData.rowCount = rows.length;
+        resData.code = 0;
+        resData.msg = 'OK';
+        res.json(resData);
+    }).catch((err) => setImmediate(() => { throw err; }));
+}
+
+const post_list_nc_history = async (req, res) => {
+    logger.info("Controller : get list nc history for prefix = " + req.body.prefix);
+    resData = {
+        code : 1,
+        msg : 'Error : Default',
+        data : []
+    };
+    db.getCountNCONUData(req.body).then(function(rows) {
+        //console.log(rows);
+        resData.data.push(rows);
         resData.rowCount = rows.length;
         resData.code = 0;
         resData.msg = 'OK';
@@ -157,5 +184,6 @@ module.exports = {
     post_rx_onu_count,
     post_rx_pon_count,
     post_pon_onu,
-    post_list_nc_onu
+    post_list_nc_onu,
+    post_list_nc_history
 }

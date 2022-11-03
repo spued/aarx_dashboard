@@ -6,9 +6,10 @@ const httpStatus = require('http-status-codes');
 const { validating, isLogged } = require('../lib/middleware');
 const db = require('../model');
 const logger = require('../lib/logger');
-const { PasswordNoMatch, PasswordHashFailed, DbNoResult } = require('../errors');
+const { PasswordNoMatch, PasswordHashFailed, DbNoResult, StatusError } = require('../errors');
 const main = require('../controller/controller_main');
 const rx_onu = require('../controller/controller_aarx_onu');
+const tx_onu = require('../controller/controller_tx_onu');
 
 function hashPassword(pwd) {
   return new Promise((res, rej) => bcrypt.hash(pwd, bcrypt.genSaltSync(), (err, hash) => {
@@ -26,6 +27,13 @@ function isValidPassword(pwd, hash) {
   });
 }
 
+function isEnable(status) {
+  return new Promise((resolve, reject) => {
+    //console.log("status = "  + status)
+    if(status == 1) resolve(true);
+    else reject(new StatusError());
+  });
+}
 
 const userschema = Joi.object().keys({
   username: Joi.string().email().required(),
@@ -62,12 +70,17 @@ module.exports = (passport) => {
           return;
         }
         isValidPassword(password, user.password)
-          .then(() => {
-            done(null, user);
-          })
-          .catch(() => {
-            done(null, false, { error: 'Incorrect password.' });
-          });
+        .then(async () => { 
+            if(await isEnable(user.status)) {
+              done(null, user);
+            } else {
+              done(e, false, { error: 'User not enable' });
+            }
+          }
+        )
+        .catch(() => {
+          done(null, false, { error: 'Incorrect password.' });
+        });
       }));
   
     passport.serializeUser((user, done) => {
@@ -119,14 +132,18 @@ module.exports = (passport) => {
     routes.get('/me', isLogged, (req, res) => res.status(httpStatus.OK).send(req.user));
     routes.get('/', isLogged, main.getMainPage);
     routes.get('/aarx_onu', isLogged, main.getAarxOnuPage);
+    routes.get('/tx_onu', isLogged, main.getTxOnuPage);
     routes.get('/logout', isLogged, main.getLogoutPage);
     routes.get('/login', isLogged, main.getLoginPage);
     routes.get('/register_request', main.getRegisterPage);
     routes.get('/user_man', isLogged, main.getUserMan);
     routes.get('/user_setting', isLogged, main.getUserSetting);
 
+    routes.post('/logout', isLogged, main.post_logout_user);
     routes.post('/list_ne', main.post_list_ne);
     routes.post('/list_user', main.post_list_users);
+    routes.post('/list_user_sessions', main.post_list_user_sessions);
+    routes.post('/list_user_logs', main.post_list_user_logs);
     routes.post('/user_save', main.post_save_user);
     routes.post('/user_delete', main.post_delete_user);
     routes.post('/user_password', main.post_password_user);
@@ -139,6 +156,10 @@ module.exports = (passport) => {
     routes.post('/rx_count_pon', isLogged, rx_onu.post_rx_pon_count);
     routes.post('/rx_pon_onu', isLogged, rx_onu.post_pon_onu);
     routes.post('/list_nc_onu', isLogged, rx_onu.post_list_nc_onu);
+    routes.post('/list_nc_history_onu', isLogged, rx_onu.post_list_nc_history);
+
+    routes.post('/tx_count_onu', isLogged, tx_onu.post_tx_onu_count);
+    routes.post('/tx_get_nc_onu', isLogged, tx_onu.post_tx_nc_onu);
 
     return routes;
 };

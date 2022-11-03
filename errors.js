@@ -9,6 +9,11 @@ class AppError extends Error {
 class DbError extends AppError {
 }
 
+class StatusError extends AppError {
+  constructor() {
+    super('Not Enable');
+  }
+}
 class DbNoResult extends DbError {
   constructor() {
     super('No result found');
@@ -32,6 +37,7 @@ class PasswordHashFailed extends PasswordError {
 
 module.exports = {
   AppError,
+  StatusError,
   DbError,
   DbNoResult,
   PasswordError,

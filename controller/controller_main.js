@@ -13,7 +13,9 @@ function hashPassword(pwd) {
 
 const getLoginPage = (req,res) => {
     console.log("Controller: Main: Get login page");
-    let message = "ok";
+    let message = {
+      failureMessage : false
+    };
     res.render('pages/login', message);
 }
 const getLogoutPage = async (req,res) => {
@@ -39,6 +41,14 @@ const getAarxOnuPage = (req,res) => {
   }).catch((err) => setImmediate(() => { throw err; })); */
   res.render('pages/aarx_onu', req.user);
 }
+const getTxOnuPage = (req,res) => {
+  console.log("Controller: Main: Get TX ONU page");
+  /* db.getOverAllNEData().then(function(rows) {
+      // now you have your rows, you can see if there are <20 of them
+        //console.log(rows);
+  }).catch((err) => setImmediate(() => { throw err; })); */
+  res.render('pages/tx_onu', req.user);
+}
 const getUserMan = (req,res) => {
   //console.log(req.user);
   console.log("Controller: Main: Get user manager page for " + req.user.fullname);
@@ -56,15 +66,32 @@ const post_login_user = async (req, res, next) => {
   await req.login(req.user, function(err) {
     if (err) { return next(err); }
     console.log(req.user);
+    db.pumpLog({
+      user_id: req.user._id,
+      username: req.user.username,
+      action: 'Logged in'
+    });
     return res.render('pages/main_page', req.user);
   });
 }
 const post_logout_user = async (req, res) => {
   console.log("Controller: Main: User logged out = " + req.user.fullname);
-    await req.logout();
-    req.session.save();
-    req.session.user = '';
-    return res.render('pages/login');
+  resData = {
+    code : 1,
+    msg : 'Error : Default' 
+  };
+  db.pumpLog({
+    user_id: req.user._id,
+    username: req.user.username,
+    action: 'Logged out'
+  });
+  await req.logout();
+  req.session.save();
+  req.session.user = '';
+  resData.code = 0;
+  resData.msg = 'Logged out';
+  //res.render('pages/login', resData);
+  res.json(resData);
 }
 const post_register_user = async (req, res) => {
     resData = {
@@ -96,12 +123,17 @@ const post_register_user = async (req, res) => {
       await db.addUser(user_data);
       resData.code = 0;
       resData.msg = 'OK';
+      db.pumpLog({
+        user_id: 'not assigned',
+        username: req.body.username,
+        action: 'Register to system'
+      });
       res.render('pages/register_ok', resData);
     } catch (e) {
       logger.error(e);
       resData.code = 500;
       resData.msg = 'Internal error occured';
-      res.render('pages/register_failed',resData);
+      res.render('pages/register_failed', resData);
     }
 }
 
@@ -113,6 +145,49 @@ const post_list_users = async (req, res) => {
   resData.data = await db.list_user({});
   resData.code = 0;
   resData.msg = "OK";
+  res.json(resData);
+}
+
+const post_list_user_sessions = async (req, res) => {
+  resData = {
+      code : 1,
+      msg : 'Error : Default'
+  };
+  var sessions_data = [];
+  const user_session_data = await db.listUserSessions({});
+  //console.log(user_session_data);
+  for(item of user_session_data){
+    //console.log(item);
+    const user_data = JSON.parse(item.session);
+    //console.log(user_data.passport.user);
+    const user_detail = await db.getUserFromField({ _id : user_data.passport.user });
+    //console.log(user_detail);
+    let _data = {
+      expires : item.expires,
+      username : user_detail.fullname,
+      email : user_detail.email,
+      company : user_detail.company,
+      type : user_detail.type
+    };
+    sessions_data.push(_data);
+  }
+  resData.data = sessions_data;
+  resData.code = 0;
+  resData.msg = "OK";
+  //console.log(resData.data);
+  res.json(resData);
+}
+
+const post_list_user_logs = async (req, res) => {
+  resData = {
+      code : 1,
+      msg : 'Error : Default'
+  };
+  const user_logs_data = await db.listUserLogs({});
+  resData.data = user_logs_data;
+  resData.code = 0;
+  resData.msg = "OK";
+  //console.log(resData.data);
   res.json(resData);
 }
 
@@ -134,6 +209,11 @@ const post_save_user = async (req, res) => {
       resData.code = 0;
       resData.msg = "OK";
       //console.log(resData.data);
+      db.pumpLog({
+        user_id: req.user._id,
+        username: req.user.username,
+        action: 'Save data for user = ' + req.body.email
+      });
       res.json(resData);
     }
   } catch (e) {
@@ -157,6 +237,11 @@ const post_delete_user = async (req, res) => {
   } else {
     resData.data = await db.delete_user(req.body);
     resData.code = 0;
+    db.pumpLog({
+      user_id: req.user._id,
+      username: req.user.username,
+      action: 'Delete data for user = ' + req.body.user_id
+    });
     resData.msg = "OK";
   }
   //console.log(resData.data);
@@ -175,19 +260,54 @@ const post_password_user = async (req, res) => {
   resData.code = 0;
   resData.msg = "OK";
   //console.log(resData.data);
+  db.pumpLog({
+    user_id: req.user._id,
+    username: req.user.username,
+    action: 'Change password for user = ' + req.body.user_id
+  });
   res.json(resData);
 }
-
+function parseUserRight(data) {
+  let province = null;
+  let rights = [];
+  if(!data) {
+    return 0;
+  } else {
+    province = data.split(',');
+    if(province.length) {
+      province.forEach(function(item) {
+        let _right = item.split(':');
+        if(_right.length == 2) {
+          rights.push({
+          name : _right[0].trim(),
+          prefix: _right[1]
+          })
+        }
+      })
+    }
+    return rights;
+  }
+}
 const post_list_ne = async (req, res) => {
   logger.info("Controller : NE list command.");
+  let rights = parseUserRight(req.user.right);
+  //console.log(rights)
   resData = {
       code : 1,
-      msg : 'Error : Default'
+      msg : 'Error : Default',
+      data : []
   };
-  db.getOverAllNEData().then((rows) => {
+  var right_regex = "";
+  rights.forEach((item)=> {
+    right_regex += item.prefix + '|'
+  })
+  var _right_regex = '^(' + right_regex.slice(0,-1) + ').*';
+   console.log(right_regex);
+  db.getOverAllNEData(_right_regex).then((rows) => {
   //console.log(rows);
     resData.data = rows;
     resData.rowCount = rows.length;
+    resData.rights = rights;
     resData.code = 0;
     resData.msg = "OK";
     res.json(resData);
@@ -199,9 +319,12 @@ module.exports = {
     getMainPage,
     getRegisterPage,
     getAarxOnuPage,
+    getTxOnuPage,
     getUserMan,
     getUserSetting,
 
+    post_list_user_sessions,
+    post_list_user_logs,
     post_register_user,
     post_login_user,
     post_logout_user,

@@ -1,3 +1,5 @@
+const date=require('joi/lib/types/date');
+const { now }=require('mongoose');
 const { mongoose } = require('./connection');
 const userSchema = new mongoose.Schema({
   uuid: {
@@ -58,9 +60,35 @@ const userSchema = new mongoose.Schema({
     default: "-",
   }
 });
-
+const logSchema = new mongoose.Schema({
+  user_id: {
+    type: String,
+    required: true
+  },
+  username: {
+    type: String,
+    required: true
+  },
+  action: {
+    type: String,
+    required: true
+  }
+}, 
+  { timestamps: true }
+)
+const sessionSchema = new mongoose.Schema({
+  expires: {
+    type: String
+  },
+  session: {
+    type: String
+  }
+})
 const User = mongoose.model('User', userSchema);
-
+const Logs = mongoose.model('Logs', logSchema);
+const Sessions = mongoose.model('sessions', sessionSchema);
 module.exports = {
   User,
+  Sessions,
+  Logs
 };

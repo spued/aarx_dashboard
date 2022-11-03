@@ -1,6 +1,10 @@
 var user_table = null;
+var user_session_table = null;
+var user_action_table = null;
+
 $(function() {
     if(user_table != null) user_table.destroy();
+    
     user_table = $('#user_table').DataTable({
       processing: true,
       serverSide: false,
@@ -18,7 +22,7 @@ $(function() {
             } 
         },
         { data: 'message' },
-        { data: 'email',
+        { data: {},
         render: function() {
             let html='';
             html += '<div class="btn-group mr-5" role="group">';
@@ -34,8 +38,91 @@ $(function() {
         $(row).attr('user_id', data._id);
       }
     });
+    
+    
 })
+$(".btn-user-session-list").on("click", function() {
+    let modal = $("#modalUserSessionList");
+    /* $.post('/list_user_sessions', {
+        } , function(res) {
+        console.log(res.data);
+    }) */
+    if(user_session_table != null) user_session_table.destroy();
+    user_session_table = $('#user_session_table').DataTable({
+        processing: true,
+        serverSide: false,
+        ajax: {
+            url: '/list_user_sessions',
+            type: 'POST',
+            data: {}
+        },
+        columns: [
+        { data: 'username' },
+        { data: 'email' },
+        { data: 'company' },
+        { data: 'expires',
+            render: (data) => {
+                //console.log(data)
+                var date = new Date(data);
+                year = date.getFullYear();
+                month = date.getMonth()+1;
+                dt = date.getDate();
+                hr = date.getHours();
+                mn = date.getMinutes();
 
+                if (dt < 10) {
+                dt = '0' + dt;
+                }
+                if (month < 10) {
+                month = '0' + month;
+                }
+                return (dt + '/' + month + '/'+ year + ' ' + hr + ':' + mn);
+            }  
+        }
+        ]
+    });
+    modal.modal('show');
+});
+
+$(".btn-user-action-logs").on("click", function() {
+    let modal = $("#modalUserActionList");
+    if(user_action_table != null) user_action_table.destroy();
+    user_action_table = $('#user_action_table').DataTable({
+        processing: true,
+        serverSide: false,
+        scrollY: '360px',
+        ajax: {
+            url: '/list_user_logs',
+            type: 'POST',
+            data: {}
+        },
+        columns: [
+          { data: 'username' },
+          { data: 'action' },
+          { 
+            data: 'createdAt',
+            render: (data) => {
+                //console.log(data)
+                var date = new Date(data);
+                year = date.getFullYear();
+                month = date.getMonth()+1;
+                dt = date.getDate();
+                hr = date.getHours();
+                mn = date.getMinutes();
+
+                if (dt < 10) {
+                    dt = '0' + dt;
+                }
+                if (month < 10) {
+                    month = '0' + month;
+                }
+                return (dt + '/' + month + '/'+ year + ' ' + hr + ':' + mn);
+            } 
+          }
+        ]
+    })
+    modal.modal('show');
+});
 $(document).on("click",".btn-edit-user",function() {
     var data = user_table.row($(this).parents('tr')).data();
     var modal = $("#modalUserEdit");
@@ -146,4 +233,10 @@ $('#modalUserEdit').on('click', 'button.close', function (eventObject) {
 });
 $('#modalChangePassword').on('click', 'button.close', function (eventObject) {
     $('#modalChangePassword').modal('hide');
+});
+$('#modalUserSessionList').on('click', 'button.close', function (eventObject) {
+    $('#modalUserSessionList').modal('hide');
+});
+$('#modalUserActionList').on('click', 'button.close', function (eventObject) {
+    $('#modalUserActionList').modal('hide');
 });

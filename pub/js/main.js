@@ -10,10 +10,26 @@ window.addEventListener('load', function() {
                 url: '/list_ne',
                 type: 'POST',
             },
+            data: {},
             columns: [
-                { data: 'NE_Name' },
+                { data : null,
+                    render : function(data, type, full, meta) {
+                      return meta.row + 1;
+                    }
+                },
+                { data: 'NE_Name',
+                    render: function(data) {
+                        return data.slice(0,3);
+                    }        
+                },
                 { data: 'ne_count' }
             ],
+            createdRow: function(row, data) {
+                //console.log(row);
+            },
+            initComplete : function(setting,data) {
+                //console.log(data)
+            }
         }
     );
     
