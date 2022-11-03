@@ -44,7 +44,7 @@ const post_tx_nc_onu = async (req, res) => {
             master_id : 0, 
             prefix : req.body.prefix
         }
-        db.getTXNCONU(_data).then(function(rows) {
+        db.get_TX_NC_ONU_data(_data).then(function(rows) {
             //console.log(rows);
             resData.data = rows;
             resData.rowCount = rows.length;

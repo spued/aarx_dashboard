@@ -146,7 +146,7 @@ function getTXONUCount(data) {
         });
     });
 }
-function getTXNCONU(data) {
+function get_TX_NC_ONU_data(data) {
     return new Promise(function(resolve, reject) {
         let sql = "SELECT DATE_FORMAT(create_at, '%Y-%m-%d') AS dates FROM aarx_status WHERE NE_Name LIKE '"
             + data.prefix + 
@@ -157,7 +157,7 @@ function getTXNCONU(data) {
             let curr_date = rows[0].dates;
             // get all master id that use by those prefix
             let sql_1 = "SELECT * FROM import_data WHERE NE_Name LIKE '"+ data.prefix + 
-                "%' AND start_at LIKE '"+ curr_date + "%' AND Transmitted_Optical_Power < 2";
+                "%' AND start_at LIKE '"+ curr_date + "%' AND Transmitted_Optical_Power < 2 AND NOT Transmitted_Optical_Power = '--'";
             //console.log(sql_1);
             db_conn.query(sql_1, function (err, _rows, fields) {
                 if (err) throw err;
@@ -650,5 +650,5 @@ module.exports = {
     getCountNCONUData,
 
     getTXONUCount,
-    getTXNCONU
+    get_TX_NC_ONU_data
 }
