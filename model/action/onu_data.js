@@ -24,7 +24,7 @@ function getDataByPrefix(prefix) {
             });
     }); 
 }
-function getPONDataByPrefix(prefix) {
+function get_PON_data_by_prefix(prefix) {
     let sql = "SELECT NE_Name,count(*) AS ne_count FROM aarx_status WHERE status = 1 AND NE_Name LIKE '"+ prefix + "%' GROUP BY NE_Name";
     //console.log(sql);
     return new Promise(function(resolve, reject) {
@@ -313,7 +313,7 @@ function get_RX_ONU_data(data) {
             let sql_1 = "SELECT * FROM aarx_status WHERE NE_Name LIKE '"+ data.prefix + "%' AND status = 1";
             // get all master id that use by those prefix
             let sql_2 = "SELECT * FROM import_data WHERE start_at LIKE '"+ curr_date + "%' AND NE_Name LIKE '"+ data.prefix + "%'";
-            //console.log(sql);
+            //console.log(sql_2);
             
             let pons=  new Promise(function(resolve, reject) {
                 db_conn.query(sql_1, function (err, rows, fields) {
@@ -333,7 +333,7 @@ function get_RX_ONU_data(data) {
                 let onu_data = res[1];
                 
                 let NRSSP = '';
-                let good = bad = 0;
+                let good = bad = offline = match = not_match = 0;
                 let onu_count = [];
                
                 //console.log('Get qty for onu = ' + onu_data.length);
@@ -341,24 +341,38 @@ function get_RX_ONU_data(data) {
                 pon_data.forEach(pon => {
                     good = 0; 
                     bad = 0;
+                    offline = 0;
+                    not_match = 0;
                     onu_data.forEach((onu) => {
-                        NRSSP = onu.NE_Name + '-' + onu.Rack + '-' + onu.Shelf + '-' + onu.Slot + '-' + onu.Port;
-                        if(NRSSP == pon.NRSSP) {
-                            //console.log("NRSSP = " + NRSSP + " Get AARX = " + AARX_Power.aarx + " VS ONU_RX = " + onu.Received_Optical_Power);
-                            if((onu.Received_Optical_Power - pon.aarx) < (-2)) {
-                                //console.log('This is bad');
-                                bad++;
+                        if(onu.Received_Optical_Power != '--') {
+                            NRSSP = onu.NE_Name + '-' + onu.Rack + '-' + onu.Shelf + '-' + onu.Slot + '-' + onu.Port;
+                            if(NRSSP == pon.NRSSP) {
+                                //console.log("NRSSP = " + NRSSP + " Get AARX = " + AARX_Power.aarx + " VS ONU_RX = " + onu.Received_Optical_Power);
+                                if((onu.Received_Optical_Power - pon.aarx) < (-2)) {
+                                    //console.log('This is bad');
+                                    bad++;
+                                } else {
+                                    //console.log('This is Good');
+                                    good++;
+                                }
+                                match++;
                             } else {
-                                //console.log('This is Good');
-                                good++;
+                                //console.log(pon.NRSSP + ' vs ' + NRSSP);
+                                not_match++;
                             }
+                        } else {
+                            offline++;
+                            //console.log('offline');
                         }
                     })
                     onu_count.push( { 
                         pon_name : pon.NRSSP,
                         pon_aarx : pon.aarx,
                         good: good,
-                        bad: bad
+                        bad: bad,
+                        offline: offline,
+                        match: match,
+                        not_match: not_match
                     });
                 })
             //console.log(onu_count);
@@ -635,7 +649,7 @@ function getCountNCONUData(data) {
 module.exports = {
     getOverAllNEData,
     getDataByPrefix,
-    getPONDataByPrefix,
+    get_PON_data_by_prefix,
     getOverAllMasterData,
     getMasterIDByPrefix,
     getActiveMasterIDByPrefix,

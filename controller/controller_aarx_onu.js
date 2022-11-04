@@ -12,7 +12,7 @@ const post_rx_province = async (req, res) => {
         code : 1,
         msg : 'Error : Default'
     };
-    db.getPONDataByPrefix(req.body.prefix).then(function(rows) {
+    db.get_PON_data_by_prefix(req.body.prefix).then(function(rows) {
         //console.log(rows);
         resData.data = rows;
         resData.rowCount = rows.length;

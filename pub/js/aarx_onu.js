@@ -63,7 +63,7 @@ $(function() {
         { data: 'good' },
         { data: 'bad' }
     ],
-    createdRow: function (data) {
+    createdRow: function (rows, data) {
       //console.log(data);
     }
   });
