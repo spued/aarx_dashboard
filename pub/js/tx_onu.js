@@ -103,7 +103,7 @@ const graph_profile = {
       label: 'TX ONU graph',
       backgroundColor: [
         'rgb(10, 190, 10)',
-        'rgb(200, 10, 10)',
+        'rgb(252, 136, 3)',
         'rgb(255, 205, 86)'
       ],
       hoverOffset: 4,
