@@ -11,6 +11,10 @@ label {
     font-size: 1.2rem;
     font-weight: bold;
 }
+
+.card-header {
+    background-color: #ffffff;
+}
 table {
     color: #464646;
     text-shadow: 0 1px 0 #fff;
@@ -43,11 +47,9 @@ img.menu_logo {
     margin-left: 80%;
     margin-right: auto; 
 }
-
 .btn {
     margin: 10px;
 }
-
 .main_graph {
     width: 80%;
     display: block;

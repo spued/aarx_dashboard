@@ -41,7 +41,7 @@ const userschema = Joi.object().keys({
   password: Joi.string().min(4).required(),
   password_confirm: Joi.string().min(4).required(),
   full_name: Joi.string().min(3).max(128),
-  company_name: Joi.string().min(3).max(128),
+  company_name: Joi.string().min(2).max(128),
   phone_number: Joi.number().min(7),
   request_message: Joi.string(),
 });
