@@ -1,5 +1,6 @@
 const { DbNoResult } = require('../../errors');
 const { User, Sessions, Logs } = require('../core/Schemas');
+const ObjectId = require('mongoose').Types.ObjectId; 
 
 function pumpLog(data) {
   const log = new Logs(data);
@@ -23,6 +24,12 @@ function addUser(data) {
 
 async function getUserFromField(field, value) {
   const u = await User.findOne({ [field]: value });
+  if (!u) throw new DbNoResult();
+  return u;
+}
+
+async function getUserFromID(user_id) {
+  const u = await User.findOne({_id: new ObjectId(user_id)});
   if (!u) throw new DbNoResult();
   return u;
 }
@@ -61,6 +68,7 @@ module.exports = {
   listUserSessions,
   listUserLogs,
   getUserFromField,
+  getUserFromID,
   userExist,
   modifyUserPassword,
   list_user,

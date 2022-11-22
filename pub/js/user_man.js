@@ -56,6 +56,7 @@ $(".btn-user-session-list").on("click", function() {
             type: 'POST',
             data: {}
         },
+        order: [[2, 'desc']],
         columns: [
         { data: 'username' },
         { data: 'email' },
@@ -96,6 +97,7 @@ $(".btn-user-action-logs").on("click", function() {
             type: 'POST',
             data: {}
         },
+        order: [[2, 'desc']],
         columns: [
           { data: 'username' },
           { data: 'action' },

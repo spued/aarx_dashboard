@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
 const { PasswordNoMatch, PasswordHashFailed, DbNoResult } = require('../errors');
 
+
 function hashPassword(pwd) {
   return new Promise((res, rej) => bcrypt.hash(pwd, bcrypt.genSaltSync(), (err, hash) => {
     if (err) rej(new PasswordHashFailed());
@@ -158,18 +159,20 @@ const post_list_user_sessions = async (req, res) => {
   //console.log(user_session_data);
   for(item of user_session_data){
     //console.log(item);
-    const user_data = JSON.parse(item.session);
-    //console.log(user_data.passport.user);
-    const user_detail = await db.getUserFromField({ _id : user_data.passport.user });
-    //console.log(user_detail);
-    let _data = {
-      expires : item.expires,
-      username : user_detail.fullname,
-      email : user_detail.email,
-      company : user_detail.company,
-      type : user_detail.type
-    };
-    sessions_data.push(_data);
+    let user_data = JSON.parse(item.session);
+    console.log(user_data.passport.user);
+    if(user_data.passport.user != undefined) {
+      let user_detail =await db.getUserFromID(user_data.passport.user);
+      //console.log(user_detail);
+      let _data = {
+        expires : item.expires,
+        username : user_detail.fullname,
+        email : user_detail.email,
+        company : user_detail.company,
+        type : user_detail.type
+      };
+      sessions_data.push(_data);
+    }
   }
   resData.data = sessions_data;
   resData.code = 0;
