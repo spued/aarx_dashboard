@@ -18,6 +18,7 @@ $(function() {
         { data: {},
             render: function (data) {
                 if(data.type == 'admin') return data.fullname + ' (*)';
+                else if(data.status == '0') return data.fullname + ' (X)';
                 else return data.fullname;
             } 
         },
