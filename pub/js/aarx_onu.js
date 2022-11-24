@@ -109,8 +109,8 @@ $(function() {
       { data: 'onu_id' },
       { data: 'NRSSP' },
       { data: 'name' },
-      { data: 'rx' },
-      { data: 'aarx' }
+      { data: 'aarx' },
+      { data: 'rx' }
     ],
     drawCallback: () => {
     }

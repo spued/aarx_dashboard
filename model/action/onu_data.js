@@ -533,16 +533,15 @@ function get_NC_ONU_data(data) {
                     })
                     if(NRSSP == AARX_Power.NRSSP) {
                         //console.log("NRSSP = " + NRSSP + " Get AARX = " + AARX_Power.aarx + " VS ONU_RX = " + onu.Received_Optical_Power);
-                        if((onu.Received_Optical_Power - AARX_Power.aarx) > (2)) {
+                        if((onu.Received_Optical_Power - AARX_Power.aarx) < (-2)) {
                             //console.log('This is over range onu');
-                            let _onu_data = {
+                            onu_res_data.push({
                                 onu_id: onu.ONU_ID,
                                 NRSSP: AARX_Power.NRSSP,
                                 name: onu.Name,
                                 rx: onu.Received_Optical_Power,
                                 aarx : AARX_Power.aarx
-                            };
-                            onu_res_data.push(_onu_data);
+                            });
                         }
                     }
                 })
