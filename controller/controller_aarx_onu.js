@@ -12,7 +12,7 @@ const post_rx_province = async (req, res) => {
         code : 1,
         msg : 'Error : Default'
     };
-    db.get_PON_data_by_prefix(req.body.prefix).then(function(rows) {
+    db.get_PON_data_by_prefix(req.body.prefix.trim()).then(function(rows) {
         //console.log(rows);
         resData.data = rows;
         resData.rowCount = rows.length;
@@ -46,7 +46,7 @@ const post_list_master_id = async (req, res) => {
     if(req.body.prefix == 'default') {
         return res.json(resData);
     } else {
-        db.getActiveMasterIDByPrefix(req.body.prefix).then(function(rows) {
+        db.getActiveMasterIDByPrefix(req.body.prefix.trim()).then(function(rows) {
             //console.log(rows);
             resData.data = rows;
             resData.rowCount = rows.length;
@@ -83,7 +83,7 @@ const post_rx_onu_count = async (req, res) => {
     } else {
         let _data = {
             master_id : req.body.master_id, 
-            prefix : req.body.prefix
+            prefix : req.body.prefix.trim()
         }
         db.getRXONUCount(_data).then(function(rows) {
             //console.log(rows);

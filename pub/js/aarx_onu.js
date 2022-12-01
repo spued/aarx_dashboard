@@ -301,7 +301,7 @@ $(document).on("click",".btn-province",function() {
   $("#province_label").text($(this).text());
   current_province = $(this).text();
 
-  $.post('/list_master_id', { prefix: $("#current_prefix").val() }, function(res) {
+  $.post('/list_master_id', { prefix: $("#current_prefix").val().trim() }, function(res) {
     //console.log(res);
     master_ids = res;
   });

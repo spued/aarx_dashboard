@@ -61,7 +61,7 @@ function getActiveMasterIDByPrefix(prefix) {
     // get all master prefix that has status 0 or 1
     let sql_1 = "SELECT * FROM aarx_master WHERE status = 1 ORDER BY created_at DESC";
     let sql_2 = "SELECT NE_Name,count(*) AS pon_count FROM aarx_status WHERE status = 1 AND NE_Name LIKE '"+ prefix + "%' GROUP BY NE_Name";
-    //console.log(sql_2);
+    //console.log(sql);
 
     let master_ids =  new Promise(function(resolve, reject) {
         db_conn.query(sql, function (err, rows, fields) {
@@ -82,9 +82,10 @@ function getActiveMasterIDByPrefix(prefix) {
         });
     });
     return Promise.all([master_ids, active_ids, pons]).then((results) => {
-    //console.log(results[0]);
+        //console.log(results[0]);
         let ids = [];
-        let last_master = [results[0][0], results[0][1]];
+        let last_master = [results[0][0]];
+        if(results[0][1] != undefined) last_master.push(results[0][1]);
         //console.log(last_master);
         results[1].forEach((item) => {
             if(last_master.find((ele) => {
@@ -169,8 +170,9 @@ function get_TX_NC_ONU_data(data) {
 function getRXONUCount(data) {
     return new Promise(function(resolve, reject) {
         let sql_0 = "SELECT DATE_FORMAT(create_at, '%Y-%m-%d') AS dates FROM aarx_status WHERE NE_Name LIKE '"
-            + data.prefix + 
+            + data.prefix.trim() + 
             "%' GROUP BY DATE_FORMAT(create_at, '%y-%m-%d') ORDER BY YEAR(create_at) DESC, MONTH(create_at) DESC, DAYOFMONTH(create_at) DESC";
+        //console.log(sql_0)
         db_conn.query(sql_0, function (err, rows, fields) {
             if (err) throw err;
             //console.log(rows[0]);
