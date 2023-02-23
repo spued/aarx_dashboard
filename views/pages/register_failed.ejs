@@ -11,18 +11,19 @@
     
     </div>
     <div class="card-body">
-    <form action="/" method="get">
-        <div class="row center_form">
-            <div class="col-xl-12">
-                <p>Result : <%= msg %></p>
-            </div>    
-            <div class="col-xl-12">
-                <span>
-                <button class="form-control btn btn-info mt-3" type="submit">Back</button>
-                </span>
+        <form action="/" method="get">
+            <div class="row center_form">
+                <div class="col-xl-12">
+                    <h5>Result :  <%= msg %></h5>
+                    <h5>ลงทะเบียนไม่สำเร็จ โปรดลองใหม่อีกครั้งหรือติดต่อผู้ดูแลระบบ</h5>
+                </div>    
+                <div class="col-xl-12">
+                    <span>
+                        <a class="form-control btn btn-warning mt-3 btn-back-to-home" href="/">Back</a>
+                    </span>
+                </div>
             </div>
-        </div>
-    </form>
+        </form>
     </div>
     <div class="card-footer">
     </div>

@@ -5,7 +5,17 @@ function parseNRSSP(nrssp) {
     var res = nrssp.split('-');
     return res;
 }
+function uniq(a) {
+    var prims = {"boolean":{}, "number":{}, "string":{}}, objs = [];
 
+    return a.filter(function(item) {
+        var type = typeof item;
+        if(type in prims)
+            return prims[type].hasOwnProperty(item) ? false : (prims[type][item] = true);
+        else
+            return objs.indexOf(item) >= 0 ? false : objs.push(item);
+    });
+}
 const post_rx_province = async (req, res) => {
     logger.info("Controller : province list rx onu = " + req.body.prefix);
     resData = {
@@ -123,8 +133,9 @@ const post_pon_onu = async (req, res) => {
         msg : 'Error : Default'
     };
     //console.log(req.body);
-    let master_id_list = JSON.parse(req.body.master_id);
-    let nrssp = parseNRSSP(req.body.nrssp);
+    const master_id_list = uniq(JSON.parse(req.body.master_id));
+    const nrssp = parseNRSSP(req.body.nrssp);
+    //console.log(master_id_list);
     let _data = {
         ne_name : nrssp[0], 
         rack : nrssp[1],

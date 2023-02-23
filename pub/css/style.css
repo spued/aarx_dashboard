@@ -1,10 +1,21 @@
 
+
 body {
-    font-family: 'arial,freesiaUPC,san-serif';
+    font-family: Arial,'promptregular',san-serif;
+    
     font-size: 62.5%;
     margin: 5px;
+    background-color:rgb(211, 207, 7);
+}
+
+a .nav-link{
+    font-family: Arial,'promptregular',san-serif;
+    font-size: 88.5%;
+    margin: 5px;
+    padding : 10px ;
     background-color:rgb(80, 146, 146);
 }
+
 label {
     color: #1109ab;
     text-shadow: 0 1px 0 #fff;

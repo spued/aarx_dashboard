@@ -383,7 +383,7 @@ function get_RX_ONU_data(data) {
     })
     })
 }
-function getPONONURXData(data) {
+async function getPONONURXData(data) {
     // get all master id that use by those prefix
     let sql = "SELECT * FROM import_data WHERE NE_Name LIKE '"+ data.ne_name + 
     "' AND Rack = "+ data.rack +
@@ -409,7 +409,8 @@ function getPONONURXData(data) {
         return res;
     });
 }
-function get_PON_ONU_RX_data(data) {
+async function get_PON_ONU_RX_data(data) {
+    
     // get all master id that use by those prefix
     let sql = "SELECT * FROM import_data WHERE NE_Name LIKE '"+ data.ne_name + 
     "' AND Rack = "+ data.rack +
@@ -432,10 +433,21 @@ function get_PON_ONU_RX_data(data) {
     });
     return Promise.all([onus]).then((res) => {
         //console.log(res);
-        return res;
+        let return_data = [];
+        let name_data = [];
+        res[0].forEach((record) => {
+           if(name_data.find(name => name == record.Name)) {
+                //console.log('Filter out: ' + record.Name);
+           } else {
+                name_data.push(record.Name);
+                return_data.push(record);
+           }
+        })
+        //console.log(name_data);
+        return [return_data];
     });
 }
-function _getNCONUData(data) {
+async function _getNCONUData(data) {
 //console.log(data);
     // get all master prefix that has status active == 0 or previous == 1
     let sql = "SELECT * FROM aarx_master WHERE id = " + data.master_id;
@@ -552,7 +564,7 @@ function get_NC_ONU_data(data) {
         });
     });
 }
-function getCountNCONUData(data) {
+async function getCountNCONUData(data) {
 
     let sql = "SELECT DATE_FORMAT(create_at, '%Y-%m-%d') AS dates FROM aarx_status WHERE NE_Name LIKE '"+ data.prefix + "%' GROUP BY DATE_FORMAT(create_at, '%y-%m-%d') ORDER BY YEAR(create_at) DESC, MONTH(create_at) DESC, DAYOFMONTH(create_at) DESC";
     let data_date = new Promise(function(resolve, reject) {

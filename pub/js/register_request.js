@@ -24,20 +24,6 @@ function register_submit() {
         return false;
     }
     const form = document.getElementById('register_form');
-    /* var formData = new FormData(form);
-    formData.append('email', email);
-    fetch(formData.action, { 
-        method:'post', 
-        body: formData 
-    }); */
-    /* var xhr = new XMLHttpRequest();
-    xhr.open("POST", "/register", true); 
-    xhr.setRequestHeader('Content-type', 'application/json');
-    xhr.onload = function(event){ 
-        alert("Success, server responded with: " + event.target.response); // raw response
-    }; 
-    // or onerror, onabort
-    xhr.send(JSON.stringify(formData)); */
     var result = form.submit();
 
     if(result.code == 0) {
