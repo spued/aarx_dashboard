@@ -54,7 +54,7 @@ function getOverAllMasterData() {
             });
     });      
 }
-function getActiveMasterIDByPrefix(prefix) {
+async function getActiveMasterIDByPrefix(prefix) {
     // get active master id by status status 0 = last, 1 = previous
     // get all master id that use by those prefix
     let sql = "SELECT master_id,count(*) AS master_count FROM aarx_status WHERE status = 1 AND NE_Name LIKE '"+ prefix + "%' GROUP BY master_id ORDER BY create_at DESC";
@@ -172,8 +172,8 @@ function getRXONUCount(data) {
         let sql_0 = "SELECT DATE_FORMAT(create_at, '%Y-%m-%d') AS dates FROM aarx_status WHERE NE_Name LIKE '"
             + data.prefix.trim() + 
             "%' GROUP BY DATE_FORMAT(create_at, '%y-%m-%d') ORDER BY YEAR(create_at) DESC, MONTH(create_at) DESC, DAYOFMONTH(create_at) DESC";
-        //console.log(sql_0)
-        db_conn.query(sql_0, function (err, rows, fields) {
+        console.log(sql_0)
+        db_conn.query(sql_0, async function (err, rows, fields) {
             if (err) throw err;
             //console.log(rows[0]);
             let curr_date = rows[0].dates;
@@ -241,7 +241,7 @@ function getRXONUCount(data) {
         });
     });
 }
-function _getRXONUData(data) {
+async function _getRXONUData(data) {
     //console.log(data);
     // get all master prefix that has status active == 0 or previous == 1
     let sql = "SELECT * FROM aarx_master WHERE id = " + data.master_id;
@@ -305,12 +305,14 @@ function _getRXONUData(data) {
 function get_RX_ONU_data(data) {
     return new Promise(function(resolve, reject) {
         let sql_0 = "SELECT DATE_FORMAT(create_at, '%Y-%m-%d') AS dates FROM aarx_status WHERE NE_Name LIKE '"
-            + data.prefix + 
+            + data.prefix.trim() + 
             "%' GROUP BY DATE_FORMAT(create_at, '%y-%m-%d') ORDER BY YEAR(create_at) DESC, MONTH(create_at) DESC, DAYOFMONTH(create_at) DESC";
-        db_conn.query(sql_0, function (err, rows, fields) {
+        
+            console.log(sql_0);
+            db_conn.query(sql_0, async function (err, rows, fields) {
             if (err) throw err;
             //console.log(rows[0]);
-            let curr_date = rows[0].dates;
+            const curr_date = rows[0].dates;
             // get all master id that use by those prefix
             let sql_1 = "SELECT * FROM aarx_status WHERE NE_Name LIKE '"+ data.prefix + "%' AND status = 1";
             // get all master id that use by those prefix
@@ -424,7 +426,7 @@ async function get_PON_ONU_RX_data(data) {
     })
 
     sql += ')';
-    //console.log(sql);
+    console.log(sql);
     let onus = new Promise(function(resolve, reject) {
         db_conn.query(sql, function (err, rows, fields) {
             if (err) throw err;

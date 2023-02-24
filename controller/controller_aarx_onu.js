@@ -96,7 +96,7 @@ const post_rx_onu_count = async (req, res) => {
             prefix : req.body.prefix.trim()
         }
         db.getRXONUCount(_data).then(function(rows) {
-            //console.log(rows);
+            console.log(rows);
             resData.data = rows;
             resData.rowCount = rows.length;
             resData.code = 0;
