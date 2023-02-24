@@ -308,7 +308,7 @@ function get_RX_ONU_data(data) {
             + data.prefix.trim() + 
             "%' GROUP BY DATE_FORMAT(create_at, '%y-%m-%d') ORDER BY YEAR(create_at) DESC, MONTH(create_at) DESC, DAYOFMONTH(create_at) DESC";
         
-            console.log(sql_0);
+            //console.log(sql_0);
             db_conn.query(sql_0, async function (err, rows, fields) {
             if (err) throw err;
             //console.log(rows[0]);
@@ -426,7 +426,7 @@ async function get_PON_ONU_RX_data(data) {
     })
 
     sql += ')';
-    console.log(sql);
+    //console.log(sql);
     let onus = new Promise(function(resolve, reject) {
         db_conn.query(sql, function (err, rows, fields) {
             if (err) throw err;

@@ -19,6 +19,16 @@ const getLoginPage = (req,res) => {
     };
     res.render('pages/login', message);
 }
+
+const getLoginFailedPage = (req,res) => {
+  console.log("Controller: Main: Get login failed page");
+  let message = {
+    failureMessage : false,
+    msg: "Login failed."
+  };
+  res.render('pages/login_failed', message);
+}
+
 const getLogoutPage = async (req,res) => {
   console.log("Controller: Main: Get logout page");
   await req.logout();
@@ -318,6 +328,7 @@ const post_list_ne = async (req, res) => {
 }
 module.exports = {
     getLoginPage,
+    getLoginFailedPage,
     getLogoutPage,
     getMainPage,
     getRegisterPage,

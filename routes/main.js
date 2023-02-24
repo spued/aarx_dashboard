@@ -3,7 +3,7 @@ const LocalStrategy = require('passport-local').Strategy;
 const bcrypt = require('bcryptjs');
 const Joi = require('joi');
 const httpStatus = require('http-status-codes');
-const { validating, isLogged } = require('../lib/middleware');
+const { register_validating, validating, isLogged } = require('../lib/middleware');
 const db = require('../model');
 const logger = require('../lib/logger');
 const { PasswordNoMatch, PasswordHashFailed, DbNoResult, StatusError } = require('../errors');
@@ -81,7 +81,8 @@ module.exports = (passport) => {
         .catch(() => {
           done(null, false, { error: 'Incorrect password.' });
         });
-      }));
+      }
+    ));
   
     passport.serializeUser((user, done) => {
       //console.log('Serialize user = ' + user._id);
@@ -102,11 +103,11 @@ module.exports = (passport) => {
       })
     });
 
-    routes.post('/register', validating(userschema), main.post_register_user);
+    routes.post('/register', register_validating(userschema), main.post_register_user);
   
     // Login using passport middleware
     routes.post('/login', validating(authenSchema),
-      passport.authenticate('local', { failureRedirect: '/login', failureMessage: true }),
+      passport.authenticate('local', { failureRedirect: '/login_failed', failureMessage: true }),
       main.post_login_user);
   
     // Simply logs out using passport middleware
@@ -135,6 +136,7 @@ module.exports = (passport) => {
     routes.get('/tx_onu', isLogged, main.getTxOnuPage);
     routes.get('/logout', isLogged, main.getLogoutPage);
     routes.get('/login', isLogged, main.getLoginPage);
+    routes.get('/login_failed', main.getLoginFailedPage);
     routes.get('/register_request', main.getRegisterPage);
     routes.get('/user_man', isLogged, main.getUserMan);
     routes.get('/user_setting', isLogged, main.getUserSetting);
