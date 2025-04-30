@@ -11,10 +11,7 @@ function uniq(a) {
 
   return a.filter(function (item) {
     var type = typeof item;
-    if (type in prims)
-      return prims[type].hasOwnProperty(item)
-        ? false
-        : (prims[type][item] = true);
+    if (type in prims) return prims[type].hasOwnProperty(item) ? false : (prims[type][item] = true);
     else return objs.indexOf(item) >= 0 ? false : objs.push(item);
   });
 }
@@ -61,9 +58,7 @@ const post_masters_info = async (req, res) => {
     );
 };
 const post_list_master_id = async (req, res) => {
-  logger.info(
-    "Controller : get master id list for prefix = " + req.body.prefix
-  );
+  logger.info("Controller : get master id list for prefix = " + req.body.prefix);
   resData = {
     code: 1,
     msg: "Error : Default",
@@ -89,9 +84,7 @@ const post_list_master_id = async (req, res) => {
   }
 };
 const post_count_pon = async (req, res) => {
-  logger.info(
-    "Controller : get pon count for master id = " + req.body.master_id
-  );
+  logger.info("Controller : get pon count for master id = " + req.body.master_id);
   resData = {
     code: 1,
     msg: "Error : Default",
@@ -223,9 +216,7 @@ const post_list_nc_onu = async (req, res) => {
     );
 };
 const post_list_nc_history = async (req, res) => {
-  logger.info(
-    "Controller : get list nc history for prefix = " + req.body.prefix
-  );
+  logger.info("Controller : get list nc history for prefix = " + req.body.prefix);
   resData = {
     code: 1,
     msg: "Error : Default",
