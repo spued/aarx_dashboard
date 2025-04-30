@@ -25,3 +25,4 @@ chrome-user-data
 console.log
 error.log
 debug.log
+packege-lock.json

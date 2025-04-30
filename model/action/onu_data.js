@@ -76,35 +76,36 @@ async function getActiveMasterIDByPrefix(prefix) {
       if (err) throw err;
       resolve(rows);
     });
-    let active_ids = new Promise(function (resolve, reject) {
-      db_conn.query(sql_1, function (err, rows, fields) {
-        if (err) throw err;
-        resolve(rows);
-      });
+  });
+  let active_ids = new Promise(function (resolve, reject) {
+    db_conn.query(sql_1, function (err, rows, fields) {
+      if (err) throw err;
+      resolve(rows);
     });
-    let pons = new Promise(function (resolve, reject) {
-      db_conn.query(sql_2, function (err, rows, fields) {
-        if (err) throw err;
-        resolve(rows);
-      });
+  });
+  let pons = new Promise(function (resolve, reject) {
+    db_conn.query(sql_2, function (err, rows, fields) {
+      if (err) throw err;
+      resolve(rows);
     });
-    return Promise.all([master_ids, active_ids, pons]).then((results) => {
-      //console.log(results[0]);
-      let ids = [];
-      let last_master = [results[0][0]];
-      if (results[0][1] != undefined) last_master.push(results[0][1]);
-      //console.log(last_master);
-      results[1].forEach((item) => {
-        if (
-          last_master.find((ele) => {
-            return ele.master_id == item.id;
-          })
-        ) {
-          ids.push(item);
-        }
-      });
-      return ids;
+  });
+
+  return Promise.all([master_ids, active_ids, pons]).then((results) => {
+    //console.log(results[0]);
+    let ids = [];
+    let last_master = [results[0][0]];
+    if (results[0][1] != undefined) last_master.push(results[0][1]);
+    //console.log(last_master);
+    results[1].forEach((item) => {
+      if (
+        last_master.find((ele) => {
+          return ele.master_id == item.id;
+        })
+      ) {
+        ids.push(item);
+      }
     });
+    return ids;
   });
 }
 function countPONByMasterID(master_id, prefix) {

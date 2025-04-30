@@ -1,42 +1,38 @@
 <%- include('./header'); %>
-<div class="container">
-  <div class="card">
+<div class="justify-content-center d-flex flex-column align-items-center">
+  <div class="card shadow m-3 w-50">
     <div class="card-header">
       <div class="imgcontainer">
-            <img src="/pub/img/aarx_logo.jpg" alt="Banner" class="banner" />
+        <img src="/pub/img/aarx_logo.jpg" alt="Banner" class="banner" />
       </div>
       <div class="center_text">
-        <h1 class="text text-info">Passive Optical Network quality index</h1>
+        <h1 class="text text-success text-shadow">PON quality index</h1>
       </div>
-      
     </div>
-    <div class="card-body">
+    <div class="card-body" style="background-color: #f1f1f1">
       <form action="/login" method="post">
         <div class="row center_form">
           <div class="col-xl-12">
-              <label for="uname">Username:</label>
-              <input class="form-control" type="text" placeholder="Enter Username" name="username" required>
+            <label class="text-success h5" for="uname">Username:</label>
+            <input class="form-control" type="text" id="uname" name="username" required />
           </div>
           <div class="col-xl-12">
-              <label for="psw">Password:</label>
-              <input class="form-control" type="password" placeholder="Enter Password" name="password" required>
+            <label class="text-success h5" for="psw">Password:</label>
+            <input class="form-control" type="password" id="psw" name="password" required />
           </div>
           <div class="col-xl-12">
-            <span>
-              <button class="form-control btn btn-info mt-3" type="submit">Login</button>
-            </span>
+            <div class="d-flex flex-row justify-content-end">
+              <button class="form-control btn btn-info mt-3 w-25" type="submit">Login</button>
+            </div>
           </div>
           <div class="col-xl-12">
-            <div class="container h5" style="background-color:#f1f1f1">
+            <div class="h5 d-flex flex-row justify-content-center" style="background-color: #f1f1f1">
               <span class="psw"><a href="/register_request">ลงทะเบียนขอเข้าใช้งาน</a></span>
             </div>
           </div>
-          
         </div>
       </form>
     </div>
-    <div class="card-footer">
-
-    </div>
+  </div>
 </div>
 <%- include('./footer'); %>
