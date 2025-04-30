@@ -1,4 +1,5 @@
 const papa = require('papaparse');
+const favicon = require('serve-favicon');
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
@@ -43,6 +44,7 @@ app.use((req, res, next) => {
 app.use(helmet());
 app.use('/pub', express.static(__dirname + '/pub'))
 app.use('/css', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/css')))
+app.use('/js', express.static(path.join(__dirname, 'node_modules/popper.js/dist/umd')))
 app.use('/js', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js')))
 
 app.use(cookieParser());
@@ -56,7 +58,7 @@ app.use(session({
   saveUninitialized: false,
   cookie: { secure: false },
   store: MongoStore.create({
-    mongoUrl: 'mongodb://'+ process.env.MONGODB_ENDPOINT +'/session',
+    mongoUrl: 'mongodb://'+ process.env.MONGODB_ENDPOINT +'/aarx_db',
     mongoOptions : { useUnifiedTopology: true },
     ttl: 14 * 24 * 60 * 60
   })
@@ -75,6 +77,8 @@ app.use(morgan('dev', {
 
 //app.use(require('./routes/user')(passport));
 app.use(require('./routes/main')(passport));
+
+app.use(favicon(__dirname + '/pub/img/favicon.ico'));
 
 app.listen(8081,() => logger.info('Listening on ' + process.env.APP_PORT));
 

@@ -1,0 +1,33 @@
+<%- include('./header'); %>
+<div class="container">
+<div class="card">
+    <div class="card-header">
+        <div class="card-header">
+            <div class="imgcontainer">
+                  <img src="/pub/img/aarx_logo.jpg" alt="Banner" class="banner" />
+            </div>
+            <div class="center_text">
+              <h1 class="text text-info">Passive Optical Network quality index</h1>
+            </div>
+            
+          </div>
+    </div>
+    <div class="card-body">
+    <form action="/" method="get">
+        <div class="row center_form">
+            <div class="col-xl-12">
+                <h5>ข้อความ :  <%= msg %></h5>
+                <h5>การล็อกอินไม่สำเร็จ โปรดลองใหม่อีกครั้ง หรือ ติดต่อผู้ดูแลระบบ</h5>
+            </div>    
+            <div class="col-xl-12">
+                <span>
+                    <a class="form-control btn btn-warning mt-3 btn-back-to-home" href="/">Back</a>
+                </span>
+            </div>
+        </div>
+    </form>
+    </div>
+    <div class="card-footer">
+    </div>
+</div>
+<%- include('./footer'); %>
